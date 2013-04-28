@@ -3,6 +3,12 @@ require_relative 'order'
 require_relative 'cart'
 require_relative 'game'
 
+class String
+  def is_int?    
+    self =~ /^-?[0-9]+$/
+  end
+end
+
 class Interface
   attr_accessor :games,:users,:current_user
 
@@ -28,28 +34,61 @@ class Interface
       games.each_with_index do |game,index|
         printf("%-#{numlen}d%-#{namelen}s%-#{genrelen}s%-#{pricelen}s\n",index+1,game.name,game.genre,game.price)
       end  
-    else puts"No games to list" 
+    else puts "#{yield} list is empty" 
     end  
   end
 
+  def get_valid_integer
+    while not((input=gets.chop).is_int?)
+      puts "\'#{input}\' is not a number." 
+      print yield     
+    end
+    input
+  end
+    
   def buy_game()
     print "Buy game Nr.:"
-    game_number = Integer(gets.chop)
+    game_number = Integer(get_valid_integer {"Buy game Nr.:"})
     while not (game_number.between?(1,@games.size))
       puts "Wrong game number. Try again."  
       print "Buy game Nr.:"
-      game_number = Integer(gets.chop)
+      game_number = Integer(get_valid_integer {"Buy game Nr.:"})
     end
     @current_user.buy(@games[game_number-1])
     puts "Game \"#{@games[game_number-1].name}\" was bought successfully."
   end  
 
-  def add_game_to_cart(game_number)
+  def add_game_to_cart()
+    print "Add game to cart Nr.:"
+    game_number = Integer(get_valid_integer {"Add game to cart Nr.:"})
+    while not (game_number.between?(1,@games.size))
+      puts "Wrong game number. Try again."  
+      print "Add game to cart Nr.:"
+      game_number = Integer(get_valid_integer {"Add game to cart Nr.:"})
+    end
     @current_user.add_game_to_cart(@games[game_number-1])
+    puts "Game \"#{@games[game_number-1].name}\" was successfully added to cart."
+  end 
+
+  def remove_game_from_cart ()
+    print "Remove game from cart Nr.:"
+    game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
+    while not (game_number.between?(1,@current_user.cart.games.size))
+      puts "Wrong game number. Try again."  
+      print "Remove game from cart Nr.:"
+      game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
+    end
+    @current_user.remove_game_from_cart(@games[game_number-1])
+    puts "Game \"#{@games[game_number-1].name}\" was successfully removed from cart."
   end  
 
   def order_games()
-    @current_user.order
+    if not(@current_user.cart.games.empty?)
+      @current_user.order
+      puts "Games in cart were successfully ordered."
+    else
+      puts "Cart is empty."
+    end  
   end  
 
   def main_loop
@@ -57,16 +96,22 @@ class Interface
     puts "Available actions:"
     puts "(B)uy a game"
     puts "(A)dd a game to cart"
+    puts "(R)emove a game from cart"
     puts "(O)rder all the games in your cart"
     puts "(L)ist bought games"
+    puts "List games in (C)art"
     puts "(E)xit"
     while (true)
       print "Select your action:"
-      action = gets.chomp
+      action = gets.chomp.capitalize
       case action
+        when "A" then add_game_to_cart
         when "B" then buy_game()
-        when "L" then list_games(@current_user.bought_games) 
-        when "E" then break;  
+        when "C" then list_games(@current_user.cart.games) {"Cart"}
+        when "L" then list_games(@current_user.bought_games ) {"Bought games"}
+        when "R" then remove_game_from_cart
+        when "O" then order_games 
+        when "E" then break; 
         else puts"Unrecognized action. Please try again"  
       end
       
@@ -75,7 +120,7 @@ class Interface
 end
 
 interface = Interface.new()
-interface.list_games(interface.games)
+interface.list_games(interface.games) {"Available games"}
 interface.main_loop
 #interface.buy_game(1)
 #interface.buy_game(3)
