@@ -1,4 +1,5 @@
 require 'yaml'
+require_relative 'cart.rb'
 
 class User
   attr_accessor :bought_games, :cart, :orders
@@ -21,8 +22,6 @@ class User
     @cart.add_game(game)
   end  
 
-    
-
   def remove_game_from_cart(game)
     @cart.remove_game(game)     
   end 
@@ -38,7 +37,14 @@ class User
       @@total_price=@@total_price+game.price
     end
     @@total_price 
-  end  
+  end 
+
+  def rate(game,rating)
+    game.rating=rating 
+    game.total_ratings_count=game.total_ratings_count+1
+  end 
 
 end    
 
+
+#yml = YAML::load(File.open('users.yml'))

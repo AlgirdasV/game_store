@@ -16,7 +16,7 @@ describe User do
 
 		before (:each) do
 				@user =	User.new
-				@game = Game.new("gta",15.13)
+				@game = Game.new("gta",15.13,"action")
 		end	
 
 		it "should be able to buy a game" do 
@@ -37,13 +37,25 @@ describe User do
 			@user.orders.should be_empty
 		end
 
+		describe ".rate" do
+			it "should increment total ratings count" do
+				expect{@user.rate(@game,5)}.to change{@game.total_ratings_count}.from(0).to(1)
+			end	
+			it "should change games rating by ..." do
+
+			end	
+			#expect{@user.rate(@game,5)}.to change{@game.rating}.to((@game.rating+5)/@game.total_ratings_count+1)
+		end	
+
+		#it "should be able rate only from 1 to 10"
 	end
+
 
 	context "after adding at least 1 game to cart" do
 
 		before (:each) do
 				@user =	User.new
-				@game = Game.new("gta",15.13)
+				@game = Game.new("gta",15.13,"action")
 				@user.add_game_to_cart(@game)
 		end
 
@@ -85,20 +97,33 @@ describe User do
 
 		end	
 	end
+	
 end
 
 describe Game do
-
+	before :each do 
+		@game = Game.new("gta",15.13,["action","sandbox"])
+	end
+	
 		it "should have a name" do
-				@game = Game.new("gta",15.13)
+				
 				@game.name.should eq("gta")
 				
 		end
 
 		it "should have a price" do
-				@game = Game.new("gta",15.13)
+				
 				@game.price.should==15.13
 				
 		end
+
+		it "should have one or more genres" do
+			
+			@game.genre.should eq(["action","sandbox"])
+		end	
+
+		it "should have a count of total users who rated it" do
+			@game.total_ratings_count.should==0
+		end	
 
 end	
