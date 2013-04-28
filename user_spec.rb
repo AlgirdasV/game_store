@@ -102,7 +102,7 @@ end
 
 describe Game do
 	before :each do 
-		@game = Game.new("gta",15.13,["action","sandbox"])
+		@game = Game.new("gta",15.13,"action, sandbox")
 	end
 	
 		it "should have a name" do
@@ -119,7 +119,7 @@ describe Game do
 
 		it "should have one or more genres" do
 			
-			@game.genre.should eq(["action","sandbox"])
+			@game.genre.should eq("action, sandbox")
 		end	
 
 		it "should have a count of total users who rated it" do
