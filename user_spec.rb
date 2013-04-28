@@ -28,10 +28,18 @@ describe User do
 			@user.cart.should be_empty
 		end	
 
-		it "should be able to add a game to cart" do
-				@user.add_game_to_cart(@game)
+		
+
+		describe ".add(game)" do
+			it "should add a game to cart" do
+			  @user.add_game_to_cart(@game)
 				@user.cart.should include(@game)
-		end
+			end
+
+			it "should raise exception when the game cannot be found" do
+			  expect{@user.add_game_to_cart(@non_existant_game)}.to raise_error(GameNotFound)
+			end
+		end	
 
 		it "should have an empty list of previous orders" do
 			@user.orders.should be_empty
@@ -67,13 +75,15 @@ describe User do
 			@user.cart.games[0].should==@game
 		end
 
-		it "should have the total price of games in the cart" do
-			@user.total_price.should ==@user.cart.games[0].price
-		end
+		describe ".remove_game_from_cart" do
+			it "should remove a game from the cart" do
+				@user.remove_game_from_cart(@game)
+				@user.cart.games.include?(@game) == true	
+			end
 
-		it "should be able to remove a game from the cart" do
-			@user.remove_game_from_cart(@game)
-			@user.cart.games.include?(@game) == true	
+			it "should raise exception when the game cannot be found" do
+			  expect{@user.remove_game_from_cart(@non_existant_game)}.to raise_error(GameNotFound)
+			end
 		end
 
 		it "should be able to order games that are in the cart" do
@@ -127,3 +137,27 @@ describe Game do
 		end	
 
 end	
+
+describe Cart do
+	before :each do
+		@cart=Cart.new()
+	end
+	it "should have the total price of games in the cart" do
+			@cart.total_price.should==0
+	end
+	describe "total_price" do
+		before :each do
+		  @game=Game.new("",5.63,"")
+		end
+
+		it "should increase after adding games to cart" do
+		  expect{@cart.add_game(@game)}.to change{@cart.total_price}.from(0).to(5.63)
+		end
+
+		it "should increase after removing games from cart" do
+			@cart.add_game(@game)
+		  expect{@cart.remove_game(@game)}.to change{@cart.total_price}.from(5.63).to(0)
+		end
+	end	
+
+end

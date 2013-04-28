@@ -1,15 +1,19 @@
 class Cart
-  attr_accessor :games
+  attr_accessor :games,:total_price
+
   def initialize()
     @games=Array.new
+    @total_price=0
   end  
 
   def add_game(game)
-    @games<<game  
+    @games<<game 
+    @total_price=@total_price+game.price 
   end  
 
   def remove_game(game)
     @games.delete(game)  
+    @total_price=@total_price-game.price
   end 
 
   def empty?()

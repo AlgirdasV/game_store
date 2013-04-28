@@ -16,7 +16,7 @@ class Game
   end  
 
   def rating
-    @rating  
+    #@rating  
   end
 
   def rating=(rating)
