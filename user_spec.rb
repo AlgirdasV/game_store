@@ -10,6 +10,38 @@ require_relative 'order'
 require_relative 'cart'
 require_relative 'game'
 
+RSpec::Matchers.define :change_to do |expected|
+  match do |actual|
+    actual.should ==expected
+  end
+end
+
+RSpec::Matchers.define :have_been_created_on do |expected|
+  match do |actual|
+    actual.created_on.should be_within(1).of(expected)
+  end
+end
+
+RSpec::Matchers.define :have_a_total_price_of do |expected|
+  match do |actual|
+    actual.total_price.should == expected
+  end
+end
+
+RSpec::Matchers.define :have_most_bought_genre do |expected|
+  match do |actual|
+    actual.most_bought_genre.should == expected
+  end
+end
+
+RSpec::Matchers.define :validate_login do |expected1,expected2|
+  match do |actual|
+  	actual.login_valid(expected1,expected2).should be_true
+  end
+end
+
+
+
 describe User do
 
 	context "when using first time" do
@@ -56,7 +88,8 @@ describe User do
 
 			it "should change games rating to new average rating." do
 				@user.rate(@game,3.4)
-				expect{@user.rate(@game,5.6)}.to change{@game.rating}.from(3.4).to((3.4+5.6)/2)
+				@user.rate(@game,5.6)
+				@game.rating.should change_to((3.4+5.6)/2)
 			end	
 
 			it "should accept rating not higher than 10" do
@@ -131,12 +164,20 @@ describe User do
 				@user.create_account("MyName","pass1234")
 			end	
 			it "should validate login name and password" do
-		  	@user.login_valid("MyName","pass1234").should be_true
+		  	@user.should validate_login("MyName","pass1234")
+		  	#login_valid("MyName","pass1234").should be_true
 			end
 			
 			it "should change users state to logged in" do
 				@user.login("MyName","pass1234")
 				@user.logged_in.should==true	
+			end
+
+			context "when login name or password is incorrect" do
+			  it "should fail" do
+			    @user.login("MyName","752654146")
+					@user.logged_in.should==false	
+			  end
 			end
 		end
 		
@@ -175,7 +216,7 @@ describe User do
 
 		  describe ".most_bought_genre" do
 				it "should return users most bought genre" do			
-				  @user3.most_bought_genre.should == "action"
+				  @user3.should have_most_bought_genre("action")
 				end
 			end
 		
@@ -204,13 +245,13 @@ describe User do
 		end
 
 		it "should have the games in the cart" do
-			@user.cart.games[0].should==@game
+			@user.cart.games.should include(@game)
 		end
 
 		describe ".remove_game_from_cart" do
 			it "should remove a game from the cart" do
 				@user.remove_game_from_cart(@game)
-				@user.cart.games.include?(@game) == true	
+				@user.cart.games.should_not include(@game)
 			end
 
 			it "should raise exception when the game cannot be found" do
@@ -274,16 +315,12 @@ describe Game do
 					@game.total_ratings_count.should==0
 				end
 			end
-
-			it "when maximum is reached" 
 			  
 		end
 
 		it "should have total_ratings" do
 			@game.total_ratings=[]
 		end	
-
-		it "should have a demo version"
 
 		it "should have multiplayer or singleplayer type" do
 			@game.multiplayer?.should==false
@@ -305,7 +342,7 @@ describe Cart do
 		@cart=Cart.new()
 	end
 	it "should have the total price of games in the cart" do
-			@cart.total_price.should==0
+			@cart.should have_a_total_price_of(0)
 	end
 	describe "total_price" do
 		before :each do
@@ -325,7 +362,12 @@ describe Cart do
 end
 
 describe Order do
- it "should have a date of creation"
+	it "should have a date of creation" do
+		@games=[]
+		@time_before_create = Time.now
+		one_second = 1
+		@order=Order.new(@games)
+		@order.should have_been_created_on(@time_before_create)
+	end
 
- it "should have information about games"
 end	

@@ -118,7 +118,11 @@ class Interface
       puts "Incorrect login name or password. Try again."
       login
     end 
-  end  
+  end 
+
+  def get_recommendations
+    list_games(@current_user.get_recommendations(@games)) {"Recommendations"}
+  end 
 
   def main_loop
     puts "Welcome to the online game store!"
@@ -132,7 +136,7 @@ class Interface
     puts "(E)xit"
     puts "(LOG) in"
     puts "Create (ACC)ount"
-    puts "(MOST) bought"
+    puts "(G)et recommendations"
     while (true)
       print "Select your action:"
       action = gets.chomp.upcase
@@ -143,6 +147,7 @@ class Interface
         when "L" then list_games(@current_user.bought_games ) {"Bought games"}
         when "LOG" then login 
         when "ACC" then create_account
+        when "G" then get_recommendations()  
         when "R" then remove_game_from_cart
         when "O" then order_games 
         when "E" then break; 
