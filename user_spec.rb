@@ -16,7 +16,7 @@ describe User do
 
 		before (:each) do
 				@user =	User.new
-				@game = Game.new("gta",15.13,"action")
+				@game = Game.new("gta",15.13,"action","single")
 		end	
 
 		it "should be able to buy a game" do 
@@ -140,8 +140,29 @@ describe User do
 			end
 		end
 		
+		describe ".play_online" do
+
+		  it "should not raise exceptions if game has an online option" do
+			  @multiplayer_game=Game.new("",0,"","multi")
+			  expect{@user.play_online(@multiplayer_game)}.to_not raise_error(NoOnlineMode)
+			end
+
+			it "should raise exceptions if game is singleplayer" do
+			  @singleplayer_game=Game.new("",0,"","single")
+			  expect{@user.play_online(@singleplayer_game)}.to raise_error(NoOnlineMode)
+			end
+
+			it "should increase number of online players by 1" do
+				@multiplayer_game=Game.new("",0,"","multi")
+				expect{@user.play_online(@multiplayer_game)}.to change{@multiplayer_game.online_player_count}.from(0).to(1)
+				
+			end
+		end
+		
+
 		it "should be able to play online"
 		it "should be able to get recommendations"
+
 	end
 
 
@@ -149,7 +170,7 @@ describe User do
 
 		before (:each) do
 				@user =	User.new
-				@game = Game.new("gta",15.13,"action")
+				@game = Game.new("gta",15.13,"action","single")
 				@user.add_game_to_cart(@game)
 		end
 
@@ -198,7 +219,7 @@ end
 
 describe Game do
 	before :each do 
-		@game = Game.new("gta",15.13,"action, sandbox")
+		@game = Game.new("gta",15.13,"action, sandbox","single")
 	end
 	
 		it "should have a name" do
@@ -238,11 +259,19 @@ describe Game do
 		end	
 
 		it "should have a demo version"
-		it "should have online or offline type"
-		it "should have a number of online players"
-		it "number of online players should increase after user starts playing"
 
+		it "should have multiplayer or singleplayer type" do
+			@game.multiplayer?.should==false
+		end
 
+		context "if it has a multiplayer option," do
+			before :each do
+				@multiplayer_game = Game.new("",1,"","multi")
+			end
+			it "should have a number of online players" do
+				@multiplayer_game.online_player_count.should==0
+			end
+		end	
 
 end	
 
@@ -255,7 +284,7 @@ describe Cart do
 	end
 	describe "total_price" do
 		before :each do
-		  @game=Game.new("",5.63,"")
+		  @game=Game.new("",5.63,"","")
 		end
 
 		it "should increase after adding games to cart" do

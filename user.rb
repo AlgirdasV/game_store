@@ -11,6 +11,10 @@ class RatingOutOfRange < Exception
 
 end
 
+class NoOnlineMode < Exception
+
+end
+
 class User
   attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in
   def initialize
@@ -38,7 +42,6 @@ class User
   end
 
   def login(name,password)
-    puts "login called with \'#{name}\' \'#{password}\'"
     if login_valid(name,password)
       @logged_in=true
     else
@@ -47,7 +50,6 @@ class User
   end
 
   def login_valid(name,password)
-    puts "login_valid called with \'#{name}\' \'#{password}\'"
     if name==@login_name && password==@password
       true
     else
@@ -65,6 +67,13 @@ class User
 
   def buy(game)
     @bought_games << game
+  end  
+
+  def play_online(game)
+    if not(game.multiplayer?)
+      raise NoOnlineMode, "Game has no multiplayer option"
+    end  
+    game.online_player_count+=1
   end  
 
   def bought_games

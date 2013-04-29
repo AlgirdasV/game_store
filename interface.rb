@@ -105,6 +105,21 @@ class Interface
     end  
   end
 
+  def login
+    print "enter login name:"
+    login_name=gets.chop
+    print "enter password:"
+    password=gets.chop
+    
+    if (@current_user.login_valid(login_name,password))
+      @current_user.login(login_name,password)
+      puts "Successfully logged in"
+    else
+      puts "Incorrect login name or password. Try again."
+      login
+    end 
+  end  
+
   def main_loop
     puts "Welcome to the online game store!"
     puts "Available actions:"
@@ -125,7 +140,7 @@ class Interface
         when "B" then buy_game()
         when "C" then list_games(@current_user.cart.games) {"Cart"}
         when "L" then list_games(@current_user.bought_games ) {"Bought games"}
-        #when "LOG" then @current_user. 
+        when "LOG" then login 
         when "ACC" then create_account
         when "R" then remove_game_from_cart
         when "O" then order_games 
