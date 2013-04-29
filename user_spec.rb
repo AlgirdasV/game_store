@@ -76,6 +76,10 @@ describe User do
 			@user.should be_valid
 		end	
 
+		it "should be either logged in or not" do
+		  @user.logged_in.should==false
+		end
+
 		it "should a have a login name" do
 			@user.login_name.should be_nil
 		end	
@@ -112,6 +116,27 @@ describe User do
 			  @firstuser.create_account("MyName","pass1234")
 			  @seconduser.create_account("MyName","123456")
 			  @seconduser.should_not be_valid
+			end
+
+			it "should only accept password longer than 7 symbols" do
+				@user2=User.new()
+			  @user2.create_account("Name","pass123")
+			  @user2.should_not be_valid
+			end
+
+		end
+
+		describe ".login" do
+			before :each do
+				@user.create_account("MyName","pass1234")
+			end	
+			it "should validate login name and password" do
+		  	@user.login_valid("MyName","pass1234").should be_true
+			end
+			
+			it "should change users state to logged in" do
+				@user.login("MyName","pass1234")
+				@user.logged_in.should==true	
 			end
 		end
 		
