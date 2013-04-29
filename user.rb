@@ -69,6 +69,26 @@ class User
     @bought_games << game
   end  
 
+  def most_bought_genre
+    genres=[]
+    bought_games.each do |game|
+        genres<<game.genre
+    end
+
+    freq = genres.inject(Hash.new(0)) { |h,v| h[v] += 1; h }
+    genres.sort_by { |v| freq[v] }.last
+  end
+
+  def get_recommendations(available_games)
+    recommendations=[]
+    available_games.each do |game|
+      if game.genre==most_bought_genre
+        recommendations<<game
+      end  
+    end
+    recommendations
+  end  
+
   def play_online(game)
     if not(game.multiplayer?)
       raise NoOnlineMode, "Game has no multiplayer option"

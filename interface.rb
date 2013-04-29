@@ -15,12 +15,12 @@ class Interface
   def initialize
     @users=[user1 = User.new()]
     @current_user=users[0]
-    @games=[game1 = Game.new("Gta",20.3,"Action"),
-    game2 = Game.new("Skyrim",30.2,"Rpg"),
-    game3 = Game.new("Deus ex",20.5,"Action, Rpg"),
-    game4 = Game.new("Fifa",23.78,"Sport"),
-    game5 = Game.new("Minecraft",15.99,"Sandbox"),
-    game6 = Game.new("Nfs",29.99,"Driving")
+    @games=[game1 = Game.new("Gta",20.3,"Action","Single"),
+    game2 = Game.new("Skyrim",30.2,"Rpg","Single"),
+    game3 = Game.new("Deus ex",20.5,"Action, Rpg","Single"),
+    game4 = Game.new("Fifa",23.78,"Sport","Single"),
+    game5 = Game.new("Minecraft",15.99,"Sandbox","Single"),
+    game6 = Game.new("Nfs",29.99,"Driving","Single")
     ]  
   end  
 
@@ -132,6 +132,7 @@ class Interface
     puts "(E)xit"
     puts "(LOG) in"
     puts "Create (ACC)ount"
+    puts "(MOST) bought"
     while (true)
       print "Select your action:"
       action = gets.chomp.upcase
@@ -145,6 +146,7 @@ class Interface
         when "R" then remove_game_from_cart
         when "O" then order_games 
         when "E" then break; 
+        when "MOST" then @current_user.most_bought_genre
         else puts"Unrecognized action. Please try again"  
       end
       

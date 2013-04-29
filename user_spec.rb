@@ -158,10 +158,35 @@ describe User do
 				
 			end
 		end
-		
 
-		it "should be able to play online"
-		it "should be able to get recommendations"
+		context "ability to get recommendations" do
+			before(:each) do
+					@available_games=[
+			  	  @action_game1=Game.new("",0,"action",""),
+						@action_game2=Game.new("",0,"action",""),
+						@action_game3=Game.new("",0,"action",""),
+						@racing_game=Game.new("",0,"racing","")
+					]
+					@user3=User.new()
+					@user3.buy(@action_game1)
+					@user3.buy(@action_game2)
+					@user3.buy(@racing_game)
+		  	end
+
+		  describe ".most_bought_genre" do
+				it "should return users most bought genre" do			
+				  @user3.most_bought_genre.should == "action"
+				end
+			end
+		
+			describe ".get_recommendations(games_available)" do
+				it "should give games according to users most_bought_genre" do
+					@user3.get_recommendations(@available_games).should==[@action_game1,@action_game2,@action_game3]
+				end
+			end
+
+		end
+		
 
 	end
 
