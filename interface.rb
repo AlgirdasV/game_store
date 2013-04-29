@@ -91,6 +91,20 @@ class Interface
     end  
   end  
 
+  def create_account
+    print "choose a new login name:"
+    login_name=gets.chop
+    print "choose a new password:"
+    password=gets.chop
+    @current_user.create_account(login_name,password)
+    if (@current_user.valid?)
+      puts "Successfully created new account. Login name: #{@current_user.login_name}"
+    else
+      puts "Password too short or login name is taken.Try again."
+      create_account
+    end  
+  end
+
   def main_loop
     puts "Welcome to the online game store!"
     puts "Available actions:"
@@ -101,14 +115,18 @@ class Interface
     puts "(L)ist bought games"
     puts "List games in (C)art"
     puts "(E)xit"
+    puts "(LOG) in"
+    puts "Create (ACC)ount"
     while (true)
       print "Select your action:"
-      action = gets.chomp.capitalize
+      action = gets.chomp.upcase
       case action
         when "A" then add_game_to_cart
         when "B" then buy_game()
         when "C" then list_games(@current_user.cart.games) {"Cart"}
         when "L" then list_games(@current_user.bought_games ) {"Bought games"}
+        #when "LOG" then @current_user. 
+        when "ACC" then create_account
         when "R" then remove_game_from_cart
         when "O" then order_games 
         when "E" then break; 

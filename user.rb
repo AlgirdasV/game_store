@@ -38,6 +38,7 @@ class User
   end
 
   def login(name,password)
+    puts "login called with \'#{name}\' \'#{password}\'"
     if login_valid(name,password)
       @logged_in=true
     else
@@ -46,6 +47,7 @@ class User
   end
 
   def login_valid(name,password)
+    puts "login_valid called with \'#{name}\' \'#{password}\'"
     if name==@login_name && password==@password
       true
     else
