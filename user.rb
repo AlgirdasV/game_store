@@ -12,16 +12,36 @@ class RatingOutOfRange < Exception
 end
 
 class User
-  attr_accessor :bought_games, :cart, :orders, :login_name
+  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid
   def initialize
     @bought_games=Array.new
     @cart=Cart.new
     @orders=Array.new
     @@total_price=0
+    @@login_names=[]
+    @valid=true
   end  
 
-  def create_account(login_name)
-    @login_name=login_name
+  def create_account(login_name,password)
+    if @@login_names.include?(login_name) 
+      @valid=false
+    else
+      @valid=true
+    end  
+    if @valid
+      @@login_names<<login_name
+
+      @login_name=login_name
+      @password=password
+    end
+  end
+
+  def valid?
+    @valid
+  end  
+
+  def login_names
+    @login_names=@@login_names
   end  
 
   def buy(game)

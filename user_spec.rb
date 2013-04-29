@@ -68,18 +68,53 @@ describe User do
 			end
 		end	
 
+		it "should have valid flag" do
+		  @user.valid.should==true
+		end
+
+		it "should be either valid or not" do
+			@user.should be_valid
+		end	
+
 		it "should a have a login name" do
 			@user.login_name.should be_nil
 		end	
 
+		it "should have a collection of all login names" do
+		  @user.login_names.should == []
+		end
+
+
+		it "should a have a password" do
+			@user.password.should be_nil
+		end
+
 		describe ".create_account" do
-			it "assign a login name" do
-				@user.create_account("MyName")
+			before :each do
+				@user.create_account("MyName","pass1234")
+			end	
+
+			it "should add login name to login_names array" do
+			  @user.login_names.should include("MyName")
+			end
+
+			it "should assign a login name" do
 				@user.login_name.should=="MyName"
 			end	
+
+			it "should assign a passowrd" do
+				 @user.password.should=="pass1234" 
+			end
+
+			it "should only accept a unique login name" do
+			  @firstuser=User.new()
+			  @seconduser=User.new()
+			  @firstuser.create_account("MyName","pass1234")
+			  @seconduser.create_account("MyName","123456")
+			  @seconduser.should_not be_valid
+			end
 		end
 		
-		it "should have a password"
 		it "should be able to play online"
 		it "should be able to get recommendations"
 	end
