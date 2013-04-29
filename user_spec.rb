@@ -47,15 +47,41 @@ describe User do
 
 		describe ".rate" do
 			it "should increment total ratings count" do
-				expect{@user.rate(@game,5)}.to change{@game.total_ratings_count}.from(0).to(1)
+				expect{@user.rate(@game,5.6)}.to change{@game.total_ratings_count}.from(0).to(1)
 			end	
-			it "should change games rating by ..." do
 
+			it "should add the rating to total_ratings" do
+				expect{@user.rate(@game,5.6)}.to change{@game.total_ratings}.from(0).to(5.6)
+			end
+
+			it "should change games rating to new average rating." do
+				@user.rate(@game,3.4)
+				expect{@user.rate(@game,5.6)}.to change{@game.rating}.from(3.4).to((3.4+5.6)/2)
 			end	
-			#expect{@user.rate(@game,5)}.to change{@game.rating}.to((@game.rating+5)/@game.total_ratings_count+1)
+
+			it "should accept rating not higher than 10" do
+			  expect{@user.rate(@game,10.1)}.to raise_error(RatingOutOfRange)
+			end
+
+			it "should accept rating not lower than 1" do
+			  expect{@user.rate(@game,0.9)}.to raise_error(RatingOutOfRange)
+			end
 		end	
 
-		#it "should be able rate only from 1 to 10"
+		it "should a have a login name" do
+			@user.login_name.should be_nil
+		end	
+
+		describe ".create_account" do
+			it "assign a login name" do
+				@user.create_account("MyName")
+				@user.login_name.should=="MyName"
+			end	
+		end
+		
+		it "should have a password"
+		it "should be able to play online"
+		it "should be able to get recommendations"
 	end
 
 
@@ -132,9 +158,31 @@ describe Game do
 			@game.genre.should eq("action, sandbox")
 		end	
 
-		it "should have a count of total users who rated it" do
-			@game.total_ratings_count.should==0
+		it "should have a rating" do
+			@game.rating.should==0
 		end	
+
+		describe ".total_ratings_count" do
+			context "when game is first created" do
+			  it "should equal zero" do
+					@game.total_ratings_count.should==0
+				end
+			end
+
+			it "when maximum is reached" 
+			  
+		end
+
+		it "should have total_ratings" do
+			@game.total_ratings=[]
+		end	
+
+		it "should have a demo version"
+		it "should have online or offline type"
+		it "should have a number of online players"
+		it "number of online players should increase after user starts playing"
+
+
 
 end	
 
@@ -161,3 +209,9 @@ describe Cart do
 	end	
 
 end
+
+describe Order do
+ it "should have a date of creation"
+
+ it "should have information about games"
+end	

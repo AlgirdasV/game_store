@@ -7,13 +7,21 @@ class GameNotFound < Exception
 
 end
 
+class RatingOutOfRange < Exception
+
+end
+
 class User
-  attr_accessor :bought_games, :cart, :orders
+  attr_accessor :bought_games, :cart, :orders, :login_name
   def initialize
     @bought_games=Array.new
     @cart=Cart.new
     @orders=Array.new
     @@total_price=0
+  end  
+
+  def create_account(login_name)
+    @login_name=login_name
   end  
 
   def buy(game)
@@ -47,8 +55,12 @@ class User
   end  
 
   def rate(game,rating)
-    game.rating=rating 
+    if (rating<1 || rating>10)
+      raise RatingOutOfRange, "Rating out of range (1..10)"
+    end  
     game.total_ratings_count=game.total_ratings_count+1
+    game.total_ratings+=rating
+    game.rating=game.total_ratings/game.total_ratings_count
   end 
 
 end    
