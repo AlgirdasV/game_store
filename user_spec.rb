@@ -48,7 +48,7 @@ describe User do
 
 		before (:each) do
 				@user =	User.new
-				@game = Game.new("gta",15.13,"action","single")
+				@game = Game.new("gta",15.13,"action","Single")
 		end	
 
 		it "should be able to buy a game" do 
@@ -73,9 +73,7 @@ describe User do
 			end
 		end	
 
-		it "should have an empty list of previous orders" do
-			@user.orders.should be_empty
-		end
+		
 
 		describe ".rate" do
 			it "should increment total ratings count" do
@@ -159,7 +157,7 @@ describe User do
 
 		end
 
-		describe ".login" do
+		describe ".log_in" do
 			before :each do
 				@user.create_account("MyName","pass1234")
 			end	
@@ -169,32 +167,43 @@ describe User do
 			end
 			
 			it "should change users state to logged in" do
-				@user.login("MyName","pass1234")
+				@user.log_in("MyName","pass1234")
 				@user.logged_in.should==true	
 			end
 
 			context "when login name or password is incorrect" do
 			  it "should fail" do
-			    @user.login("MyName","752654146")
+			    @user.log_in("MyName","752654146")
 					@user.logged_in.should==false	
 			  end
 			end
+
 		end
+
+		describe "log_out" do
+			it "should change users state to logged out" do
+				@user.create_account("MyName","pass1234")
+				@user.log_in("MyName","pass1234")
+			  expect{@user.log_out}.to change{@user.logged_in}.to(false)
+			end
+
+
+		end	
 		
 		describe ".play_online" do
 
 		  it "should not raise exceptions if game has an online option" do
-			  @multiplayer_game=Game.new("",0,"","multi")
+			  @multiplayer_game=Game.new("",0,"","Multi")
 			  expect{@user.play_online(@multiplayer_game)}.to_not raise_error(NoOnlineMode)
 			end
 
 			it "should raise exceptions if game is singleplayer" do
-			  @singleplayer_game=Game.new("",0,"","single")
+			  @singleplayer_game=Game.new("",0,"","Single")
 			  expect{@user.play_online(@singleplayer_game)}.to raise_error(NoOnlineMode)
 			end
 
 			it "should increase number of online players by 1" do
-				@multiplayer_game=Game.new("",0,"","multi")
+				@multiplayer_game=Game.new("",0,"","Multi")
 				expect{@user.play_online(@multiplayer_game)}.to change{@multiplayer_game.online_player_count}.from(0).to(1)
 				
 			end
@@ -236,7 +245,7 @@ describe User do
 
 		before (:each) do
 				@user =	User.new
-				@game = Game.new("gta",15.13,"action","single")
+				@game = Game.new("gta",15.13,"action","Single")
 				@user.add_game_to_cart(@game)
 		end
 
@@ -269,6 +278,9 @@ describe User do
 				@user.order
 			end
 
+		it "should have a list of previous orders" do
+			@user.orders.should be_empty
+		end
 			it "should have an empty shopping cart" do
 				 @user.cart.should be_empty
 			end
@@ -285,7 +297,7 @@ end
 
 describe Game do
 	before :each do 
-		@game = Game.new("gta",15.13,"action, sandbox","single")
+		@game = Game.new("gta",15.13,"action, sandbox","Single")
 	end
 	
 		it "should have a name" do
@@ -365,7 +377,6 @@ describe Order do
 	it "should have a date of creation" do
 		@games=[]
 		@time_before_create = Time.now
-		one_second = 1
 		@order=Order.new(@games)
 		@order.should have_been_created_on(@time_before_create)
 	end

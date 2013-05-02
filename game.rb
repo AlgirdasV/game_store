@@ -8,10 +8,10 @@ class Game
     @@total_ratings_count=0
     @online_player_count=0
     @total_ratings=0
-    if multiplayer_option=="single"
-      @multiplayer_option=false
-    else
+    if multiplayer_option=="Multi"
       @multiplayer_option=true
+    else
+       @multiplayer_option=false
     end
   end 
 
