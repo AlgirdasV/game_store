@@ -20,7 +20,7 @@ class AlreadyLoggedIn < Exception
 end
 
 class User
-  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in,:accounts
+  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in
   def initialize
     @bought_games=Array.new
     @cart=Cart.new
@@ -29,7 +29,6 @@ class User
     @@login_names=[]
     @valid=true
     @logged_in=false
-    @@accounts=[]
   end  
 
   def create_account(login_name,password)
@@ -40,20 +39,23 @@ class User
     end  
     if @valid
       @@login_names<<login_name
-      @@accounts<<Account.new(login_name,password)
-      @login_name=login_name
-      @password=password
+      account=Account.new(login_name,password)
+      account
     end
   end
 
 
 
   def log_in(name,password)
-    if login_valid(name,password)
-      @logged_in=true
-    else
-      @logged_in=false
+
+    Account.all_accounts.each do |account|
+          if account.login_name==name
+            @found_account=account
+          end
     end
+    validate_login(@found_account,password)
+    @logged_in=true
+    @found_account
   end
 
   def log_out
@@ -64,13 +66,14 @@ class User
     end    
   end  
 
-  def login_valid(name,password)
-    if name==@login_name && password==@password
+  def validate_login(account,password)
+    if account.password==password
       true
     else
       false
     end  
   end  
+ 
 
   def valid?
     @valid
@@ -148,11 +151,3 @@ class User
 
 end    
 
-class Account
-  attr_accessor :login_name,:password
-  def initialize(login_name,password)
-    @login_name=login_name
-    @password=password
-  end  
-end  
-#yml = YAML::load(File.open('users.yml'))

@@ -2,6 +2,7 @@ require_relative 'user'
 require_relative 'order'
 require_relative 'cart'
 require_relative 'game'
+require_relative 'account'
 
 class String
   def is_int?    

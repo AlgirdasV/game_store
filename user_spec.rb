@@ -9,6 +9,7 @@ require_relative 'user'
 require_relative 'order'
 require_relative 'cart'
 require_relative 'game'
+require_relative 'account'
 
 RSpec::Matchers.define :change_to do |expected|
   match do |actual|
@@ -38,6 +39,13 @@ RSpec::Matchers.define :validate_login do |expected1,expected2|
   match do |actual|
   	actual.login_valid(expected1,expected2).should be_true
   end
+end
+
+RSpec::Matchers.define :include_account_with_login_name do |expected|
+	match do |actual|
+		actual
+  end
+
 end
 
 
@@ -128,11 +136,9 @@ describe User do
 		end
 
 		describe ".create_account" do
-			before :each do
-				@user.create_account("MyName","pass1234")
-			end	
 
 			it "should add login name to login_names array" do
+			  @user.create_account("MyName","pass1234")
 			  @user.login_names.should include("MyName")
 			end
 
@@ -141,13 +147,9 @@ describe User do
 				@user.create_account("new","pass1234")
 			end
 
-
-			it "should assign a login name" do
-				@user.login_name.should=="MyName"
-			end	
-
-			it "should assign a passowrd" do
-				 @user.password.should=="pass1234" 
+			it "should return the created account" do
+				Account.all_accounts.clear
+			  @user.create_account("new","pass1234").should ==Account.all_accounts[0]
 			end
 
 			it "should only accept a unique login name" do
@@ -168,25 +170,52 @@ describe User do
 
 		describe ".log_in" do
 			before :each do
-				@user.create_account("MyName","pass1234")
+				@account1=@user.create_account("MyName","pass1234")
+				@account2=@user.create_account("differentName","pass9874")
 			end	
-			it "should validate login name and password" do
-		  	@user.should validate_login("MyName","pass1234")
-		  	#login_valid("MyName","pass1234").should be_true
+
+			it "should validate login" do
+				@user.should_receive(:validate_login).with(@account2,"pass1234")
+				@user.log_in("differentName","pass1234")
 			end
-			
+
 			it "should change users state to logged in" do
-				@user.log_in("MyName","pass1234")
-				@user.logged_in.should==true	
+			  expect{@user.log_in("differentName","pass1234")}.to change {@user.logged_in}.to(true)
 			end
 
-			context "when login name or password is incorrect" do
-			  it "should fail" do
-			    @user.log_in("MyName","752654146")
-					@user.logged_in.should==false	
-			  end
+			it "should return the account to which user has logged in" do	
+				@user.log_in("differentName","pass1234").should ==@account2
 			end
 
+			it "should merge users cart with the account cart" do
+	
+			  #@account=Account.new("Name","password")
+			  #@acc_game1=Game.new("1",0,"","")
+			  ##@acc_game2=Game.new("2",0,"","")
+			  #@usr_game1=Game.new("3",0,"","")
+			 # #@usr_game2=Game.new("4",0,"","")
+			 # @account.cart.games<<[@acc_game1,@acc_game2]
+			 # @user.cart.stub(:games).and_return([@usr_game1,@usr_game2])
+			 # @user.log_in()
+			 # @account.cart.games.should 
+
+			end
+
+		end
+
+		describe ".validate_login" do
+			before :each do
+				Account.all_accounts.clear
+				@account=@user.create_account("MyName","pass1234")
+			end
+					
+			it "should check if password is correct" do
+			  @user.validate_login(@account,"pass1234").should == true
+			end
+
+			it "should check if password is incorrect" do
+			  @user.validate_login(@account,"skasdassd").should == false
+			end
 		end
 
 		describe "log_out" do
@@ -322,8 +351,13 @@ describe Account do
 	it "should have a login name" do
 		@account.login_name.should == "name"
 	end	
+
 	it "should have a password" do
 	  @account.password.should == "password"
+	end
+
+	it "should be stored in a array of all accounts" do
+	  Account.all_accounts.should include(@account)
 	end
 	
 end	
