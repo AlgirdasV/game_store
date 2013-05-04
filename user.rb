@@ -15,8 +15,12 @@ class NoOnlineMode < Exception
 
 end
 
+class AlreadyLoggedIn < Exception
+
+end
+
 class User
-  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in
+  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in,:accounts
   def initialize
     @bought_games=Array.new
     @cart=Cart.new
@@ -25,6 +29,7 @@ class User
     @@login_names=[]
     @valid=true
     @logged_in=false
+    @@accounts=[]
   end  
 
   def create_account(login_name,password)
@@ -35,19 +40,29 @@ class User
     end  
     if @valid
       @@login_names<<login_name
-
+      @@accounts<<Account.new(login_name,password)
       @login_name=login_name
       @password=password
     end
   end
 
-  def login(name,password)
+
+
+  def log_in(name,password)
     if login_valid(name,password)
       @logged_in=true
     else
       @logged_in=false
     end
   end
+
+  def log_out
+    if @logged_in
+      @logged_in=false
+    else
+      raise AlreadyLoggedIn
+    end    
+  end  
 
   def login_valid(name,password)
     if name==@login_name && password==@password
@@ -133,4 +148,11 @@ class User
 
 end    
 
+class Account
+  attr_accessor :login_name,:password
+  def initialize(login_name,password)
+    @login_name=login_name
+    @password=password
+  end  
+end  
 #yml = YAML::load(File.open('users.yml'))

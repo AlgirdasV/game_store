@@ -61,6 +61,9 @@ describe User do
 		end	
 
 		
+		it "should have a list of previous orders" do
+			@user.orders.should be_empty
+		end
 
 		describe ".add(game)" do
 			it "should add a game to cart" do
@@ -133,6 +136,12 @@ describe User do
 			  @user.login_names.should include("MyName")
 			end
 
+			it "should create and pass information to new account" do
+				Account.should_receive(:new).with("new","pass1234")
+				@user.create_account("new","pass1234")
+			end
+
+
 			it "should assign a login name" do
 				@user.login_name.should=="MyName"
 			end	
@@ -181,11 +190,19 @@ describe User do
 		end
 
 		describe "log_out" do
-			it "should change users state to logged out" do
+			before :each do
 				@user.create_account("MyName","pass1234")
 				@user.log_in("MyName","pass1234")
+			end	
+
+			it "should change users state to logged out" do		
 			  expect{@user.log_out}.to change{@user.logged_in}.to(false)
 			end
+
+			it "should fail when already logged out" do
+				@user.logged_in=false
+				expect{@user.log_out}.to raise_error(AlreadyLoggedIn)
+			end	
 
 
 		end	
@@ -278,9 +295,7 @@ describe User do
 				@user.order
 			end
 
-		it "should have a list of previous orders" do
-			@user.orders.should be_empty
-		end
+	
 			it "should have an empty shopping cart" do
 				 @user.cart.should be_empty
 			end
@@ -294,6 +309,24 @@ describe User do
 	end
 	
 end
+
+describe Account do
+	before :each do
+		@account=Account.new("name","password")
+	end	
+
+	subject {@account}
+	it {should respond_to :login_name}
+	it {should respond_to :password}
+
+	it "should have a login name" do
+		@account.login_name.should == "name"
+	end	
+	it "should have a password" do
+	  @account.password.should == "password"
+	end
+	
+end	
 
 describe Game do
 	before :each do 

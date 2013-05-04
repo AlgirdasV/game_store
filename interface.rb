@@ -149,6 +149,7 @@ class Interface
       puts "User is already logged out"
     else
       @current_user.log_out
+      puts "Successfully logged out"
     end  
   end
 
