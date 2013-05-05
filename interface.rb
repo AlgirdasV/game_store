@@ -107,7 +107,7 @@ class Interface
   end  
 
   def create_account
-    
+
     begin
       print "Choose a new login name or (C)ancel:"
       login_name=gets.chop 
@@ -133,21 +133,25 @@ class Interface
       puts "Already logged in"
       return
     end 
-    print "enter login name or (C)ancel:"
+
+    print "Enter login name or (C)ancel:"
     login_name=gets.chop
     if (login_name.upcase=="C")
       return
     end 
-    print "enter password:"
+    print "Enter password:"
     password=gets.chop
     
-    if (@current_user.login_valid(login_name,password))
-      @current_user.log_in(login_name,password)
-      puts "Successfully logged in"
-    else
-      puts "Incorrect login name or password. Try again or (C)ancel."
+    @current_user.log_in(login_name,password)#Raises InvalidLogin and IncorrectPassword errors
+    puts "Successfully logged in"
+
+    rescue InvalidLogin
+      puts "Such login name doesn't exist. Try again."
       log_in
-    end 
+    rescue IncorrectPassword
+      puts "Password is incorrect. Try again."  
+      log_in
+
   end 
 
   def log_out
