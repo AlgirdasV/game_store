@@ -27,8 +27,18 @@ class IncorrectPassword < Exception
 
 end
 
+class NotUniqueName < Exception
+
+end
+
+class PasswordTooShort < Exception
+
+end
+
+
 class User
-  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in
+  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :logged_in
+
   def initialize
     @bought_games=Array.new
     @cart=Cart.new
@@ -40,19 +50,18 @@ class User
   end  
 
   def create_account(login_name,password)
-    if @@login_names.include?(login_name) || password.length<8
-      @valid=false
-    else
-      @valid=true
+    if @@login_names.include?(login_name)
+      raise NotUniqueName
     end  
-    if @valid
-      @@login_names<<login_name
-      account=Account.new(login_name,password)
-      account
-    end
+
+    if password.length<8
+      raise PasswordTooShort
+    end  
+
+    @@login_names<<login_name
+    account=Account.new(login_name,password)
+    account
   end
-
-
 
   def log_in(name,password)
 
@@ -82,11 +91,6 @@ class User
     else
       raise AlreadyLoggedIn
     end    
-  end  
- 
-
-  def valid?
-    @valid
   end  
 
   def login_names
