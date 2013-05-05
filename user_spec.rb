@@ -73,8 +73,9 @@ describe User do
 			@user.orders.should be_empty
 		end
 
-		describe ".add(game)" do
-			it "should add a game to cart" do
+		describe ".add_game_to_cart(game)" do
+
+		  it "should add a game to cart" do
 			  @user.add_game_to_cart(@game)
 				@user.cart.should include(@game)
 			end
@@ -82,9 +83,8 @@ describe User do
 			it "should raise exception when the game cannot be found" do
 			  expect{@user.add_game_to_cart(@non_existant_game)}.to raise_error(GameNotFound)
 			end
-		end	
 
-		
+		end	
 
 		describe ".rate" do
 			it "should increment total ratings count" do
@@ -173,9 +173,14 @@ describe User do
 			  	expect{@user.log_in("differentName","pass1234")}.to change {@user.logged_in}.to(true)
 				end
 
+				it "should change users state to logged in" do
+			  	expect{@user.log_in("differentName","pass1234")}.to change {@account2.logged_in}.to(true)
+				end
+
 				it "should return the account to which user has logged in" do	
 					@user.log_in("differentName","pass1234").should ==@account2
 				end
+
 
 				it "should merge users cart with the account cart" do
 				  @account=Account.new("Name","password")
@@ -188,8 +193,17 @@ describe User do
 				 	@account.cart.games<<[@acc_game1,@acc_game2,@common_game]
 					@user.cart.games<<[@usr_game,@common_game]
 					@user.log_in("Name","password")
-					@account.cart.games.should =~[@acc_game1,@acc_game2,@common_game,@common_game,@usr_game]
+					@account.cart.games.should =~[@acc_game1,@acc_game2,@common_game,@usr_game]
 
+				end
+					
+				it "should clear users cart after merging" do
+				  @account=Account.new("Name","password")
+					@usr_game=Game.new("1",0,"","")
+					@usr_game2=Game.new("2",0,"","")
+					@user.cart.games<<[@usr_game,@usr_game2]
+					@user.log_in("Name","password")
+					@user.cart.games.should be_empty
 				end
 			end
 
@@ -339,6 +353,9 @@ describe Account do
 	subject {@account}
 	it {should respond_to :login_name}
 	it {should respond_to :password}
+	it {should respond_to :log_out}
+	it {should respond_to :add_game_to_cart}
+	it {should respond_to :remove_game_from_cart}
 
 	it "should have a login name" do
 		@account.login_name.should == "name"
@@ -351,7 +368,33 @@ describe Account do
 	it "should be stored in a array of all accounts" do
 	  Account.all_accounts.should include(@account)
 	end
-	
+
+	it "should have a login flag" do
+		@new_account=Account.new("name","password")
+	  @new_account.logged_in.should==false
+	end
+
+	describe ".log_out" do
+
+	end	
+
+	describe ".add_game_to_cart" do
+		it "adds game to account's cart's games array" do
+			@game=Game.new("",0,"","")
+			@account.add_game_to_cart(@game)
+		  @account.cart.games.should include(@game)
+		end
+	end	
+
+	describe ".remove_game_from_cart" do
+		it "removes game from account's cart's games array" do
+			@game=Game.new("",0,"","")
+			@account.cart.games<<@game
+			@account.remove_game_from_cart(@game)
+		  @account.cart.games.should_not include(@game)
+		end
+	end	
+
 end	
 
 describe Game do

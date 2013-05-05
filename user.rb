@@ -79,8 +79,10 @@ class User
 
     if @found_account.password==password
       concatenated=@found_account.cart.games.concat(@cart.games)
-      @found_account.cart.games=concatenated.flatten
+      @found_account.cart.games=concatenated.flatten.uniq
+      @cart.games.clear
       @logged_in=true
+      @found_account.logged_in=true
       @found_account
     else
       raise IncorrectPassword

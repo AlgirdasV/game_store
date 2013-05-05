@@ -11,11 +11,13 @@ class String
 end
 
 class Interface
-  attr_accessor :games,:users,:current_user,:current_account
+  attr_accessor :games,:users,:accounts,:current_user,:current_account
 
   def initialize
     @users=[user1 = User.new()]
     @current_user=users[0]
+    @current_account=nil
+    @accounts=[]
     @games=[game1 = Game.new("Gta",20.3,"Action","Single"),
     game2 = Game.new("Skyrim",30.2,"Rpg","Single"),
     game3 = Game.new("Deus ex",20.5,"Rpg","Single"),
@@ -76,21 +78,43 @@ class Interface
       print "Add game to cart Nr.:"
       game_number = Integer(get_valid_integer {"Add game to cart Nr.:"})
     end
-    @current_user.add_game_to_cart(@games[game_number-1])
-    puts "Game \"#{@games[game_number-1].name}\" was successfully added to cart."
+
+    if !@current_user.logged_in  
+      @current_user.add_game_to_cart(@games[game_number-1])
+      puts "Game \"#{@games[game_number-1].name}\" was successfully added to Users #{@current_user}cart."
+    else
+      @current_account.add_game_to_cart(@games[game_number-1])
+      puts "Game \"#{@games[game_number-1].name}\" was successfully added to accounts #{current_account}cart."
+          #MODIFY!!!!!
+    end    
   end 
 
   def remove_game_from_cart ()
     print "Remove game from cart Nr.:"
     game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
-    while not (game_number.between?(1,@current_user.cart.games.size))
-      puts "Wrong game number. Try again."  
-      print "Remove game from cart Nr.:"
-      game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
-    end
-    removed_game_name=@current_user.cart.games[game_number-1].name
-    @current_user.remove_game_from_cart(@current_user.cart.games[game_number-1])
-    puts "Game \"#{removed_game_name}\" was successfully removed from cart."
+    
+
+    if !current_user.logged_in  
+      while not (game_number.between?(1,@current_user.cart.games.size))
+        puts "Wrong game number. Try again."  
+        print "Remove game from cart Nr.:"
+        game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
+      end
+      removed_game_name=@current_user.cart.games[game_number-1].name
+      @current_user.remove_game_from_cart(@current_user.cart.games[game_number-1])
+      puts "Game \"#{removed_game_name}\" was successfully removed from cart."  
+    else
+      while not (game_number.between?(1,@current_account.cart.games.size))
+        puts "Wrong game number. Try again."  
+        print "Remove game from cart Nr.:"
+        game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
+      end
+      removed_game_name=@current_account.cart.games[game_number-1].name
+      @current_account.remove_game_from_cart(@current_account.cart.games[game_number-1])
+      puts "Game \"#{removed_game_name}\" was successfully removed from cart."
+    end  
+
+    
   end  
 
   def order_games()
@@ -117,6 +141,7 @@ class Interface
       print "Choose a new password:"
       password=gets.chop
       account=@current_user.create_account(login_name,password)#Raises NotUniqueName and PasswordTooShort errors
+      accounts<<account
       puts "Successfully created new account. Login name: #{account.login_name}"
       rescue NotUniqueName
         puts "Login name is already taken. Try again."
@@ -142,7 +167,8 @@ class Interface
     print "Enter password:"
     password=gets.chop
     
-    @current_user.log_in(login_name,password)#Raises InvalidLogin and IncorrectPassword errors
+    account=@current_user.log_in(login_name,password)#Raises InvalidLogin and IncorrectPassword errors
+    @current_account=account
     puts "Successfully logged in"
 
     rescue InvalidLogin
@@ -158,7 +184,8 @@ class Interface
     if (!@current_user.logged_in)
       puts "User is already logged out"
     else
-      @current_user.log_out
+      @current_account=nil
+      @current_user.logged_in=false
       puts "Successfully logged out"
     end  
   end
@@ -188,7 +215,12 @@ class Interface
       case action
         when "A" then add_game_to_cart
         when "B" then buy_game()
-        when "C" then list_games(@current_user.cart.games) {"Cart"}
+        when "C" then 
+          if (!@current_user.logged_in)
+            list_games(@current_user.cart.games) {"Cart"}
+          else  
+            list_games(@current_account.cart.games) {"Cart"}
+          end  
         when "L" then list_games(@current_user.bought_games ) {"Bought games"}
         when "LOGIN" then log_in 
         when "LOGOUT" then log_out 
