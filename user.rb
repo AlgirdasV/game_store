@@ -3,35 +3,35 @@ require_relative 'cart.rb'
 require_relative 'game.rb'
 
 
-class GameNotFound < Exception
+class GameNotFound < StandardError
 
 end
 
-class RatingOutOfRange < Exception
+class RatingOutOfRange < StandardError
 
 end
 
-class NoOnlineMode < Exception
+class NoOnlineMode < StandardError
 
 end
 
-class AlreadyLoggedIn < Exception
+class AlreadyLoggedIn < StandardError
 
 end
 
-class InvalidLogin < Exception
+class InvalidLogin < StandardError
 
 end
 
-class IncorrectPassword < Exception
+class IncorrectPassword < StandardError
 
 end
 
-class NotUniqueName < Exception
+class NotUniqueName < StandardError
 
 end
 
-class PasswordTooShort < Exception
+class PasswordTooShort < StandardError
 
 end
 
@@ -50,17 +50,19 @@ class User
   end  
 
   def create_account(login_name,password)
-    if @@login_names.include?(login_name)
-      raise NotUniqueName
-    end  
+    begin
+      if @@login_names.include?(login_name)
+        raise NotUniqueName
+      end  
 
-    if password.length<8
-      raise PasswordTooShort
-    end  
+      if password.length<8
+        raise PasswordTooShort
+      end  
 
-    @@login_names<<login_name
-    account=Account.new(login_name,password)
-    account
+      @@login_names<<login_name
+      account=Account.new(login_name,password)
+      account
+    end
   end
 
   def log_in(name,password)

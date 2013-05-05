@@ -11,7 +11,7 @@ class String
 end
 
 class Interface
-  attr_accessor :games,:users,:current_user
+  attr_accessor :games,:users,:current_user,:current_account
 
   def initialize
     @users=[user1 = User.new()]
@@ -107,20 +107,25 @@ class Interface
   end  
 
   def create_account
-    print "choose a new login name or (C)ancel:"
-    login_name=gets.chop 
-    if (login_name.upcase=="C")
-      return
+    
+    begin
+      print "Choose a new login name or (C)ancel:"
+      login_name=gets.chop 
+      if (login_name.upcase=="C")
+        return
+      end
+      print "Choose a new password:"
+      password=gets.chop
+      account=@current_user.create_account(login_name,password)#Raises NotUniqueName and PasswordTooShort errors
+      puts "Successfully created new account. Login name: #{account.login_name}"
+      rescue NotUniqueName
+        puts "Login name is already taken. Try again."
+        create_account
+      rescue PasswordTooShort
+        puts  "Password is too short. Try again."
+        create_account
     end
-    print "choose a new password:"
-    password=gets.chop
-    @current_user.create_account(login_name,password)
-    if (@current_user.valid?)
-      puts "Successfully created new account. Login name: #{@current_user.login_name}"
-    else
-      puts "Password too short or login name is taken.Try again or (C)ancel."
-      create_account
-    end  
+
   end
 
   def log_in
