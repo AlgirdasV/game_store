@@ -19,6 +19,14 @@ class AlreadyLoggedIn < Exception
 
 end
 
+class InvalidLogin < Exception
+
+end
+
+class IncorrectPassword < Exception
+
+end
+
 class User
   attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :valid, :logged_in
   def initialize
@@ -53,9 +61,19 @@ class User
             @found_account=account
           end
     end
-    validate_login(@found_account,password)
-    @logged_in=true
-    @found_account
+    
+    if @found_account==nil 
+      raise InvalidLogin
+    end
+
+    if @found_account.password==password
+      concatenated=@found_account.cart.games.concat(@cart.games)
+      @found_account.cart.games=concatenated.flatten
+      @logged_in=true
+      @found_account
+    else
+      raise IncorrectPassword
+    end  
   end
 
   def log_out
@@ -64,14 +82,6 @@ class User
     else
       raise AlreadyLoggedIn
     end    
-  end  
-
-  def validate_login(account,password)
-    if account.password==password
-      true
-    else
-      false
-    end  
   end  
  
 

@@ -168,55 +168,56 @@ describe User do
 
 		end
 
+
 		describe ".log_in" do
 			before :each do
+				Account.all_accounts.clear
 				@account1=@user.create_account("MyName","pass1234")
-				@account2=@user.create_account("differentName","pass9874")
+				@account2=@user.create_account("differentName","pass1234")
+				
 			end	
 
-			it "should validate login" do
-				@user.should_receive(:validate_login).with(@account2,"pass1234")
-				@user.log_in("differentName","pass1234")
+			context "if valid" do
+			  it "should change users state to logged in" do
+			  	expect{@user.log_in("differentName","pass1234")}.to change {@user.logged_in}.to(true)
+				end
+
+				it "should return the account to which user has logged in" do	
+					@user.log_in("differentName","pass1234").should ==@account2
+				end
+
+				it "should merge users cart with the account cart" do
+				  @account=Account.new("Name","password")
+				  @acc_game1=Game.new("1",0,"","")
+				  @acc_game2=Game.new("2",0,"","")
+				  @usr_game=Game.new("3",0,"","")
+				 	@common_game=Game.new("4",0,"","")
+				 	@account.cart.games.clear
+				 	@user.cart.games.clear
+				 	@account.cart.games<<[@acc_game1,@acc_game2,@common_game]
+					@user.cart.games<<[@usr_game,@common_game]
+					@user.log_in("Name","password")
+					@account.cart.games.should =~[@acc_game1,@acc_game2,@common_game,@common_game,@usr_game]
+
+				end
 			end
 
-			it "should change users state to logged in" do
-			  expect{@user.log_in("differentName","pass1234")}.to change {@user.logged_in}.to(true)
-			end
+			context "if invalid" do
 
-			it "should return the account to which user has logged in" do	
-				@user.log_in("differentName","pass1234").should ==@account2
-			end
+			  it "should raise exception when given a wrong password" do
+			    expect{@user.log_in("differentName","invalidPass")}.to raise_error(IncorrectPassword)
+			  end
 
-			it "should merge users cart with the account cart" do
-	
-			  #@account=Account.new("Name","password")
-			  #@acc_game1=Game.new("1",0,"","")
-			  ##@acc_game2=Game.new("2",0,"","")
-			  #@usr_game1=Game.new("3",0,"","")
-			 # #@usr_game2=Game.new("4",0,"","")
-			 # @account.cart.games<<[@acc_game1,@acc_game2]
-			 # @user.cart.stub(:games).and_return([@usr_game1,@usr_game2])
-			 # @user.log_in()
-			 # @account.cart.games.should 
+			  it "should raise exception when given a non existant login name" do
+			    expect{@user.log_in("nonExistantName","anypassw")}.to raise_error(InvalidLogin)
+			  end
 
 			end
+
 
 		end
 
-		describe ".validate_login" do
-			before :each do
-				Account.all_accounts.clear
-				@account=@user.create_account("MyName","pass1234")
-			end
-					
-			it "should check if password is correct" do
-			  @user.validate_login(@account,"pass1234").should == true
-			end
-
-			it "should check if password is incorrect" do
-			  @user.validate_login(@account,"skasdassd").should == false
-			end
-		end
+		
 
 		describe "log_out" do
 			before :each do
