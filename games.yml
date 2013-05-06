@@ -1,0 +1,161 @@
+---
+- !ruby/object:Game
+  name: Gta
+  price: 20.3
+  genre: Action
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Skyrim
+  price: 30.2
+  genre: Rpg
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Deus ex
+  price: 20.5
+  genre: Rpg
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Fifa
+  price: 23.78
+  genre: Sport
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Minecraft
+  price: 15.99
+  genre: Sandbox
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Nfs
+  price: 29.99
+  genre: Driving
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Assassins Creed
+  price: 24.99
+  genre: Action
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Call of Duty
+  price: 13.99
+  genre: Shooter
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Crysis
+  price: 20.0
+  genre: Action
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: LFS
+  price: 20.0
+  genre: Driving
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Gta
+  price: 20.3
+  genre: Action
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Skyrim
+  price: 30.2
+  genre: Rpg
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Deus ex
+  price: 20.5
+  genre: Rpg
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Fifa
+  price: 23.78
+  genre: Sport
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Minecraft
+  price: 15.99
+  genre: Sandbox
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Nfs
+  price: 29.99
+  genre: Driving
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Assassins Creed
+  price: 24.99
+  genre: Action
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Call of Duty
+  price: 13.99
+  genre: Shooter
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: Crysis
+  price: 20.0
+  genre: Action
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false
+- !ruby/object:Game
+  name: LFS
+  price: 20.0
+  genre: Driving
+  rating: 0
+  online_player_count: 0
+  total_ratings: 0
+  multiplayer_option: false

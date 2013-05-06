@@ -37,7 +37,7 @@ end
 
 
 class User
-  attr_accessor :bought_games, :cart, :orders, :login_name, :password, :login_names, :logged_in
+  attr_accessor :bought_games, :cart, :orders, :login_names, :logged_in
 
   def initialize
     @bought_games=Array.new
@@ -45,7 +45,6 @@ class User
     @orders=Array.new
     @@total_price=0
     @@login_names=[]
-    @valid=true
     @logged_in=false
   end  
 
@@ -66,24 +65,24 @@ class User
   end
 
   def log_in(name,password)
-
+    found_account=nil
     Account.all_accounts.each do |account|
           if account.login_name==name
-            @found_account=account
+            found_account=account
           end
     end
     
-    if @found_account==nil 
+    if found_account==nil 
       raise InvalidLogin
     end
 
-    if @found_account.password==password
-      concatenated=@found_account.cart.games.concat(@cart.games)
-      @found_account.cart.games=concatenated.flatten.uniq
+    if found_account.password==password
+      concatenated=found_account.cart.games.concat(@cart.games)
+      found_account.cart.games=concatenated.flatten.uniq
       @cart.games.clear
       @logged_in=true
-      @found_account.logged_in=true
-      @found_account
+      found_account.logged_in=true
+      found_account
     else
       raise IncorrectPassword
     end  

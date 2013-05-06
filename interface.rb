@@ -1,3 +1,5 @@
+require 'yaml/store'
+require 'yaml'
 require_relative 'user'
 require_relative 'order'
 require_relative 'cart'
@@ -11,24 +13,13 @@ class String
 end
 
 class Interface
-  attr_accessor :games,:users,:accounts,:current_user,:current_account
+  attr_accessor :games,:user,:accounts,:user,:current_account
 
   def initialize
-    @users=[user1 = User.new()]
-    @current_user=users[0]
+    @user=User.new()
     @current_account=nil
     @accounts=[]
-    @games=[game1 = Game.new("Gta",20.3,"Action","Single"),
-    game2 = Game.new("Skyrim",30.2,"Rpg","Single"),
-    game3 = Game.new("Deus ex",20.5,"Rpg","Single"),
-    game4 = Game.new("Fifa",23.78,"Sport","Single"),
-    game5 = Game.new("Minecraft",15.99,"Sandbox","Single"),
-    game6 = Game.new("Nfs",29.99,"Driving","Single"),
-    game7 = Game.new("Assassins Creed",24.99,"Action","Single"),
-    game8 = Game.new("Call of Duty",13.99,"Shooter","Single"),
-    game9 = Game.new("Crysis",20.00,"Action","Single"),
-    game10 = Game.new("LFS",20.00,"Driving","multi")
-    ]
+    @games=[]
   end  
 
 
@@ -38,11 +29,12 @@ class Interface
       namelen=20
       genrelen=25
       pricelen=5  
+      puts "#{yield}:"
       printf("%-#{numlen}s%-#{namelen}s%-#{genrelen}s%-#{pricelen}s\n","Number:","Name:","Genre:","Price:")
       games.each_with_index do |game,index|
         printf("%-#{numlen}d%-#{namelen}s%-#{genrelen}s%-#{pricelen}s\n",index+1,game.name,game.genre,game.price)
       end  
-    else puts "#{yield} list is empty" 
+    else puts "#{yield} is empty" 
     end  
   end
 
@@ -55,7 +47,7 @@ class Interface
   end
     
   def buy_game()
-    if @current_user.logged_in
+    if @user.logged_in
       print "Buy game Nr.:"
       game_number = Integer(get_valid_integer {"Buy game Nr.:"})
       while not (game_number.between?(1,@games.size))
@@ -63,7 +55,7 @@ class Interface
         print "Buy game Nr.:"
         game_number = Integer(get_valid_integer {"Buy game Nr.:"})
       end
-      @current_user.buy(@games[game_number-1])
+      @user.buy(@games[game_number-1])
       puts "Game \"#{@games[game_number-1].name}\" was bought successfully."
     else
       puts "You must login before buying games"
@@ -79,13 +71,12 @@ class Interface
       game_number = Integer(get_valid_integer {"Add game to cart Nr.:"})
     end
 
-    if !@current_user.logged_in  
-      @current_user.add_game_to_cart(@games[game_number-1])
-      puts "Game \"#{@games[game_number-1].name}\" was successfully added to Users #{@current_user}cart."
+    if !@user.logged_in  
+      @user.add_game_to_cart(@games[game_number-1])
+      puts "Game \"#{@games[game_number-1].name}\" was successfully added to users cart."
     else
       @current_account.add_game_to_cart(@games[game_number-1])
-      puts "Game \"#{@games[game_number-1].name}\" was successfully added to accounts #{current_account}cart."
-          #MODIFY!!!!!
+      puts "Game \"#{@games[game_number-1].name}\" was successfully added to #{@current_account.login_name}'s cart."
     end    
   end 
 
@@ -94,14 +85,14 @@ class Interface
     game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
     
 
-    if !current_user.logged_in  
-      while not (game_number.between?(1,@current_user.cart.games.size))
+    if !user.logged_in  
+      while not (game_number.between?(1,@user.cart.games.size))
         puts "Wrong game number. Try again."  
         print "Remove game from cart Nr.:"
         game_number = Integer(get_valid_integer {"Remove game from cart Nr.:"})
       end
-      removed_game_name=@current_user.cart.games[game_number-1].name
-      @current_user.remove_game_from_cart(@current_user.cart.games[game_number-1])
+      removed_game_name=@user.cart.games[game_number-1].name
+      @user.remove_game_from_cart(@user.cart.games[game_number-1])
       puts "Game \"#{removed_game_name}\" was successfully removed from cart."  
     else
       while not (game_number.between?(1,@current_account.cart.games.size))
@@ -114,13 +105,12 @@ class Interface
       puts "Game \"#{removed_game_name}\" was successfully removed from cart."
     end  
 
-    
   end  
 
   def order_games()
-    if @current_user.logged_in
-      if not(@current_user.cart.games.empty?)
-        @current_user.order
+    if @user.logged_in
+      if not(@user.cart.games.empty?)
+        @user.order
         puts "Games in cart were successfully ordered."
       else
         puts "Cart is empty."
@@ -140,7 +130,7 @@ class Interface
       end
       print "Choose a new password:"
       password=gets.chop
-      account=@current_user.create_account(login_name,password)#Raises NotUniqueName and PasswordTooShort errors
+      account=@user.create_account(login_name,password)#Raises NotUniqueName and PasswordTooShort errors
       accounts<<account
       puts "Successfully created new account. Login name: #{account.login_name}"
       rescue NotUniqueName
@@ -154,7 +144,7 @@ class Interface
   end
 
   def log_in
-    if @current_user.logged_in
+    if @user.logged_in
       puts "Already logged in"
       return
     end 
@@ -167,7 +157,7 @@ class Interface
     print "Enter password:"
     password=gets.chop
     
-    account=@current_user.log_in(login_name,password)#Raises InvalidLogin and IncorrectPassword errors
+    account=@user.log_in(login_name,password)#Raises InvalidLogin and IncorrectPassword errors
     @current_account=account
     puts "Successfully logged in"
 
@@ -181,17 +171,17 @@ class Interface
   end 
 
   def log_out
-    if (!@current_user.logged_in)
+    if (!@user.logged_in)
       puts "User is already logged out"
     else
       @current_account=nil
-      @current_user.logged_in=false
+      @user.logged_in=false
       puts "Successfully logged out"
     end  
   end
 
   def get_recommendations
-    list_games(@current_user.get_recommendations(@games)) {"Recommendations"}
+    list_games(@user.get_recommendations(@games)) {"Recommendations"}
   end 
 
   def main_loop
@@ -209,19 +199,63 @@ class Interface
     puts "Create (ACC)ount"
     puts "(G)et recommendations"
     puts "List (AV)ailable games"
+    puts "(LOAD)"
+    puts "(STORE)"
     while (true)
       print "\nSelect your action:"
       action = gets.chomp.upcase
       case action
+        when "STORE" then 
+
+          File.open( 'games.yml', 'w+' ) do|f|
+            f.print @games.to_yaml
+          end  
+
+          File.open( 'user.yml', 'w+' ) do|f|
+            f.puts @user.to_yaml
+          end  
+
+          File.open( 'accounts.yml', 'w+' ) do|f|
+            f.puts @accounts.to_yaml
+          end
+
+        when "LOAD" then
+          games=YAML::load_file('games.yml')
+          games.each do |game|
+  
+            @games<<game
+          end 
+
+          user= YAML::load_file('user.yml')
+          
+          @user=user
+     
+
+          accounts=YAML::load_file('accounts.yml')
+          accounts.each do |account|
+            Account.all_accounts<<account
+            if account.logged_in=true
+              @current_account=account
+            end  
+            @accounts<<account
+          
+          end
+
+          if @user.logged_in
+            puts "State: logged in to #{@current_account.login_name} account"
+          else
+            puts "State: logged out"
+          end
+
         when "A" then add_game_to_cart
         when "B" then buy_game()
         when "C" then 
-          if (!@current_user.logged_in)
-            list_games(@current_user.cart.games) {"Cart"}
+          if (!@user.logged_in)
+            list_games(@user.cart.games) {"User's Cart"}
           else  
-            list_games(@current_account.cart.games) {"Cart"}
+            list_games(@current_account.cart.games) {"#{@current_account.login_name}'s Cart"}
           end  
-        when "L" then list_games(@current_user.bought_games ) {"Bought games"}
+        when "L" then list_games(@user.bought_games ) {"Bought games"}
         when "LOGIN" then log_in 
         when "LOGOUT" then log_out 
         when "ACC" then create_account
@@ -236,7 +270,7 @@ class Interface
     end  
   end  
 end
-yml = YAML::load(File.open('users.yml'))
+
 interface = Interface.new()
 interface.list_games(interface.games) {"Available games"}
 interface.main_loop

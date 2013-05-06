@@ -114,17 +114,8 @@ describe User do
 		  @user.logged_in.should==false
 		end
 
-		it "should a have a login name" do
-			@user.login_name.should be_nil
-		end	
-
 		it "should have a collection of all login names" do
 		  @user.login_names.should == []
-		end
-
-
-		it "should a have a password" do
-			@user.password.should be_nil
 		end
 
 		describe ".create_account" do
@@ -379,10 +370,15 @@ describe Account do
 	end	
 
 	describe ".add_game_to_cart" do
-		it "adds game to account's cart's games array" do
+		it "adds game to games array in account's cart" do
 			@game=Game.new("",0,"","")
 			@account.add_game_to_cart(@game)
 		  @account.cart.games.should include(@game)
+		end
+
+		it "increases total price of account's cart" do
+		  @game=Game.new("",15.63,"","")
+			expect{@account.add_game_to_cart(@game)}.to change{@account.cart.total_price}.to(15.63)
 		end
 	end	
 
@@ -467,7 +463,7 @@ describe Cart do
 		  expect{@cart.add_game(@game)}.to change{@cart.total_price}.from(0).to(5.63)
 		end
 
-		it "should increase after removing games from cart" do
+		it "should decrease after removing games from cart" do
 			@cart.add_game(@game)
 		  expect{@cart.remove_game(@game)}.to change{@cart.total_price}.from(5.63).to(0)
 		end
