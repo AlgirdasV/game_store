@@ -30,4 +30,16 @@ class Cart
     end  
   end  
 
+  def clear
+    @games.clear
+    @total_price=0
+  end 
+
+  def recalculate_price
+    @total_price=0
+    @games.each do |game|
+      @total_price+=game.price
+    end 
+  end 
+
 end  

@@ -11,44 +11,12 @@ require_relative 'cart'
 require_relative 'game'
 require_relative 'account'
 
-RSpec::Matchers.define :change_to do |expected|
-  match do |actual|
-    actual.should ==expected
-  end
-end
-
-RSpec::Matchers.define :have_been_created_on do |expected|
-  match do |actual|
-    actual.created_on.should be_within(1).of(expected)
-  end
-end
-
-RSpec::Matchers.define :have_a_total_price_of do |expected|
-  match do |actual|
-    actual.total_price.should == expected
-  end
-end
-
-RSpec::Matchers.define :have_most_bought_genre do |expected|
-  match do |actual|
-    actual.most_bought_genre.should == expected
-  end
-end
-
-RSpec::Matchers.define :validate_login do |expected1,expected2|
-  match do |actual|
-  	actual.login_valid(expected1,expected2).should be_true
-  end
-end
-
-RSpec::Matchers.define :include_account_with_login_name do |expected|
-	match do |actual|
-		actual
-  end
-
-end
-
-
+#Used matchers:
+#1 be_empty
+#2 include
+#3 raise_error
+#4 change
+#5 match_array
 
 describe User do
 
@@ -67,11 +35,6 @@ describe User do
 		it "should have an empty shopping cart" do
 			@user.cart.should be_empty
 		end	
-
-		
-		it "should have a list of previous orders" do
-			@user.orders.should be_empty
-		end
 
 		describe ".add_game_to_cart(game)" do
 
@@ -97,8 +60,7 @@ describe User do
 
 			it "should change games rating to new average rating." do
 				@user.rate(@game,3.4)
-				@user.rate(@game,5.6)
-				@game.rating.should change_to((3.4+5.6)/2)
+				expect{@user.rate(@game,5.6)}.to change{@game.rating}.to((3.4+5.6)/2)
 			end	
 
 			it "should accept rating not higher than 10" do
@@ -132,14 +94,13 @@ describe User do
 
 			it "should return the created account" do
 				Account.all_accounts.clear
-			  @user.create_account("new","pass1234").should ==Account.all_accounts[0]
+			  @user.create_account("new","pass1234").should == Account.all_accounts.first#SKETCHY
 			end
 
 			it "should only accept a unique login name" do
-			  @firstuser=User.new()
-			  @seconduser=User.new()
-			  @firstuser.create_account("MyName","pass1234")
-			  expect{@firstuser.create_account("MyName","123456")}.to raise_error(NotUniqueName)
+			  @user2=User.new()
+			  @user2.create_account("MyName","pass1234")
+			  expect{@user2.create_account("MyName","123456")}.to raise_error(NotUniqueName)
 			end
 
 			it "should only accept password longer than 7 symbols" do
@@ -149,7 +110,6 @@ describe User do
 			end
 
 		end
-
 
 		describe ".log_in" do
 			before :each do
@@ -164,14 +124,13 @@ describe User do
 			  	expect{@user.log_in("differentName","pass1234")}.to change {@user.logged_in}.to(true)
 				end
 
-				it "should change users state to logged in" do
+				it "should change account's state to logged in" do
 			  	expect{@user.log_in("differentName","pass1234")}.to change {@account2.logged_in}.to(true)
 				end
 
 				it "should return the account to which user has logged in" do	
 					@user.log_in("differentName","pass1234").should ==@account2
 				end
-
 
 				it "should merge users cart with the account cart" do
 				  @account=Account.new("Name","password")
@@ -184,8 +143,24 @@ describe User do
 				 	@account.cart.games<<[@acc_game1,@acc_game2,@common_game]
 					@user.cart.games<<[@usr_game,@common_game]
 					@user.log_in("Name","password")
-					@account.cart.games.should =~[@acc_game1,@acc_game2,@common_game,@usr_game]
+					@account.cart.games.should match_array([@common_game,@acc_game1,@acc_game2,@usr_game])
+				end
 
+				it "should merge users total_price with accounts total price" do
+				  @account=Account.new("Name","password")
+				  @acc_game1=Game.new("1",5,"","")
+				  @acc_game2=Game.new("2",10,"","")
+				  @usr_game=Game.new("3",15,"","")
+				 	@common_game=Game.new("4",10,"","")
+				 	@account.cart.games.clear
+				 	@user.cart.games.clear
+				 	@account.cart.add_game(@acc_game1)
+				 	@account.cart.add_game(@acc_game2)
+				 	@account.cart.add_game(@common_game)
+					@user.cart.add_game(@usr_game)
+					@user.cart.add_game(@common_game)
+					@user.log_in("Name","password")
+					@account.cart.total_price.should ==5+10+15+10
 				end
 					
 				it "should clear users cart after merging" do
@@ -196,6 +171,8 @@ describe User do
 					@user.log_in("Name","password")
 					@user.cart.games.should be_empty
 				end
+
+
 			end
 
 			context "if invalid" do
@@ -210,14 +187,11 @@ describe User do
 
 			end
 
-
-		end
-
-		
+		end		
 
 		describe "log_out" do
 			before :each do
-				@user.create_account("MyName","pass1234")
+				@account=@user.create_account("MyName","pass1234")
 				@user.log_in("MyName","pass1234")
 			end	
 
@@ -225,9 +199,10 @@ describe User do
 			  expect{@user.log_out}.to change{@user.logged_in}.to(false)
 			end
 
+
 			it "should fail when already logged out" do
 				@user.logged_in=false
-				expect{@user.log_out}.to raise_error(AlreadyLoggedIn)
+				expect{@user.log_out}.to raise_error(AlreadyLoggedOut)
 			end	
 
 
@@ -252,37 +227,9 @@ describe User do
 			end
 		end
 
-		context "ability to get recommendations" do
-			before(:each) do
-					@available_games=[
-			  	  @action_game1=Game.new("",0,"action",""),
-						@action_game2=Game.new("",0,"action",""),
-						@action_game3=Game.new("",0,"action",""),
-						@racing_game=Game.new("",0,"racing","")
-					]
-					@user3=User.new()
-					@user3.buy(@action_game1)
-					@user3.buy(@action_game2)
-					@user3.buy(@racing_game)
-		  	end
-
-		  describe ".most_bought_genre" do
-				it "should return users most bought genre" do			
-				  @user3.should have_most_bought_genre("action")
-				end
-			end
 		
-			describe ".get_recommendations(games_available)" do
-				it "should give games according to users most_bought_genre" do
-					@user3.get_recommendations(@available_games).should==[@action_game1,@action_game2,@action_game3]
-				end
-			end
-
-		end
 		
-
 	end
-
 
 	context "after adding at least 1 game to cart" do
 
@@ -311,27 +258,7 @@ describe User do
 			end
 		end
 
-		it "should be able to order games that are in the cart" do
-			@user.order
-			@user.orders[0].games[0].name.should match(@game.name)
-		end
-
-		context "after ordering games" do
-			before (:each) do
-				@user.order
-			end
-
-	
-			it "should have an empty shopping cart" do
-				 @user.cart.should be_empty
-			end
-
-			it "should have information about previously ordered games" do
-				@user.orders[0].games[0].name.should eq(@game.name)
-				@user.orders[0].games[0].price.should eq(@game.price)
-			end
-
-		end	
+		
 	end
 	
 end
@@ -347,6 +274,10 @@ describe Account do
 	it {should respond_to :log_out}
 	it {should respond_to :add_game_to_cart}
 	it {should respond_to :remove_game_from_cart}
+
+	it "should have a list of previous orders" do
+		@account.orders.should be_empty
+	end
 
 	it "should have a login name" do
 		@account.login_name.should == "name"
@@ -366,7 +297,17 @@ describe Account do
 	end
 
 	describe ".log_out" do
+		it "should change account's state to logged out" do
+		  @user=User.new
+		  @account.logged_in=true
+		  expect{@account.log_out}.to change{@account.logged_in}.to(false)
+		end
 
+		it "should raise error if account was already logged out" do
+		  @user=User.new
+		  @account.logged_in=false
+		  expect{@account.log_out}.to raise_error(AlreadyLoggedOut)
+		end
 	end	
 
 	describe ".add_game_to_cart" do
@@ -390,6 +331,61 @@ describe Account do
 		  @account.cart.games.should_not include(@game)
 		end
 	end	
+
+	it "should be able to order games that are in the cart" do
+			@game=Game.new("",0,"","")
+			@account.add_game_to_cart(@game)
+			@account.order
+			@account.orders[0].games.should include(@game)
+	end
+
+	context "ability to get recommendations" do
+			before(:each) do
+					@available_games=[
+			  	  @action_game1=Game.new("",0,"action",""),
+						@action_game2=Game.new("",0,"action",""),
+						@action_game3=Game.new("",0,"action",""),
+						@racing_game1=Game.new("",0,"racing",""),
+						@racing_game2=Game.new("",0,"racing",""),
+						@racing_game3=Game.new("",0,"racing",""),
+						@racing_game4=Game.new("",0,"racing","")
+					]
+					@user=User.new()
+					@account=@user.create_account("Name","password")
+					@account.add_game_to_cart(@action_game1)
+					@account.add_game_to_cart(@action_game2)
+					@account.add_game_to_cart(@racing_game1)
+					@account.add_game_to_cart(@racing_game2)
+					@account.add_game_to_cart(@racing_game3)
+					@account.add_game_to_cart(@racing_game4)
+					@account.order
+		  	end
+
+		  describe ".most_bought_genre" do
+				it "should return users most bought genre" do			
+				  @account.most_bought_genre.should == "racing"
+				end
+			end
+		
+			describe ".get_recommendations(games_available)" do
+				it "should give games according to users most_bought_genre" do
+					@account.get_recommendations(@available_games).should==[@racing_game1,@racing_game2,@racing_game3,@racing_game4]
+				end
+			end
+
+		end
+
+		context "after ordering games" do
+			before (:each) do
+				@game=Game.new("",0,"","")
+				@account.order
+			end
+
+			it "should have an empty shopping cart" do
+				 @account.cart.should be_empty
+			end
+
+		end	
 
 end	
 
@@ -451,9 +447,11 @@ describe Cart do
 	before :each do
 		@cart=Cart.new()
 	end
+
 	it "should have the total price of games in the cart" do
-			@cart.should have_a_total_price_of(0)
+			@cart.total_price.should == 0
 	end
+
 	describe "total_price" do
 		before :each do
 		  @game=Game.new("",5.63,"","")
@@ -469,14 +467,43 @@ describe Cart do
 		end
 	end	
 
+	describe ".recalculate_price" do
+		it "should recalculate total price of games in the cart" do
+			@game=Game.new("",5.63,"","")
+			@game2=Game.new("",17.38,"","")
+			@cart.games<<@game
+			@cart.games<<@game2
+			expect{@cart.recalculate_price}.to change{@cart.total_price}.from(0).to(5.63+17.38)
+		end	
+	end	
+
+	describe ".clear" do
+		before :each do
+			@game1=Game.new("",10,"","")
+		  @cart.add_game(@game1)
+		  
+		end  
+		it "should remove all games from the cart" do
+			@cart.clear
+		  @cart.games.should be_empty
+		end
+
+		it "should reset total price to zero" do
+			expect{@cart.clear}.to change{@cart.total_price}.to(0)
+		  
+		end
+	end	
+
 end
 
 describe Order do
 	it "should have a date of creation" do
+		@time_now = Time.now
+  	Time.stub!(:now).and_return(@time_now)
+
 		@games=[]
-		@time_before_create = Time.now
 		@order=Order.new(@games)
-		@order.should have_been_created_on(@time_before_create)
+		@order.created_on.should eql(@time_now)
 	end
 
 end	

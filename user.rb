@@ -15,7 +15,7 @@ class NoOnlineMode < StandardError
 
 end
 
-class AlreadyLoggedIn < StandardError
+class AlreadyLoggedOut < StandardError
 
 end
 
@@ -37,12 +37,12 @@ end
 
 
 class User
-  attr_accessor :bought_games, :cart, :orders, :login_names, :logged_in
+  attr_accessor :bought_games, :cart, :login_names, :logged_in
 
   def initialize
-    @bought_games=Array.new
+    @bought_games=[]
     @cart=Cart.new
-    @orders=Array.new
+   
     @@total_price=0
     @@login_names=[]
     @logged_in=false
@@ -77,9 +77,10 @@ class User
     end
 
     if found_account.password==password
-      concatenated=found_account.cart.games.concat(@cart.games)
-      found_account.cart.games=concatenated.flatten.uniq
-      @cart.games.clear
+      merged=found_account.cart.games.concat(@cart.games)
+      found_account.cart.games=merged.flatten.uniq
+      found_account.cart.recalculate_price
+      @cart.clear
       @logged_in=true
       found_account.logged_in=true
       found_account
@@ -92,7 +93,7 @@ class User
     if @logged_in
       @logged_in=false
     else
-      raise AlreadyLoggedIn
+      raise AlreadyLoggedOut
     end    
   end  
 
@@ -102,26 +103,6 @@ class User
 
   def buy(game)
     @bought_games << game
-  end  
-
-  def most_bought_genre
-    genres=[]
-    bought_games.each do |game|
-        genres<<game.genre
-    end
-
-    freq = genres.inject(Hash.new(0)) { |h,v| h[v] += 1; h }
-    genres.sort_by { |v| freq[v] }.last
-  end
-
-  def get_recommendations(available_games)
-    recommendations=[]
-    available_games.each do |game|
-      if game.genre==most_bought_genre
-        recommendations<<game
-      end  
-    end
-    recommendations
   end  
 
   def play_online(game)
@@ -150,12 +131,6 @@ class User
 
     @cart.remove_game(game)     
   end 
-
-  def order()
-    order=Order.new(cart.games)
-    @orders<<order
-    @cart.games.clear
-  end  
 
   def rate(game,rating)
     if (rating<1 || rating>10)

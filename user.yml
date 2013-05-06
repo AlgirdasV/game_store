@@ -2,6 +2,6 @@
 bought_games: []
 cart: !ruby/object:Cart
   games: []
-  total_price: 49.989999999999995
+  total_price: 0
 orders: []
-logged_in: true
+logged_in: false

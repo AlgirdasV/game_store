@@ -1,36 +1,12 @@
 ---
 - !ruby/object:Account
-  login_name: name
-  password: password
+  login_name: jonas
+  password: '12345678'
   cart: !ruby/object:Cart
     games:
     - !ruby/object:Game
-      name: Deus ex
-      price: 20.5
-      genre: Rpg
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    - !ruby/object:Game
-      name: Call of Duty
-      price: 13.99
-      genre: Shooter
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    - !ruby/object:Game
       name: Assassins Creed
       price: 24.99
-      genre: Action
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    - !ruby/object:Game
-      name: Crysis
-      price: 20.0
       genre: Action
       rating: 0
       online_player_count: 0
@@ -45,24 +21,9 @@
       total_ratings: 0
       multiplayer_option: false
     - !ruby/object:Game
-      name: Assassins Creed
-      price: 24.99
-      genre: Action
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    total_price: 70.47999999999999
-  logged_in: true
-- !ruby/object:Account
-  login_name: name
-  password: password
-  cart: !ruby/object:Cart
-    games:
-    - !ruby/object:Game
-      name: Deus ex
-      price: 20.5
-      genre: Rpg
+      name: Fifa
+      price: 23.78
+      genre: Sport
       rating: 0
       online_player_count: 0
       total_ratings: 0
@@ -75,36 +36,20 @@
       online_player_count: 0
       total_ratings: 0
       multiplayer_option: false
-    - !ruby/object:Game
-      name: Assassins Creed
-      price: 24.99
-      genre: Action
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    - !ruby/object:Game
-      name: Crysis
-      price: 20.0
-      genre: Action
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    - !ruby/object:Game
-      name: Nfs
-      price: 29.99
-      genre: Driving
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    total_price: 45.489999999999995
+    total_price: 92.74999999999999
   logged_in: true
 - !ruby/object:Account
-  login_name: name2
-  password: password
+  login_name: petras
+  password: '12345678'
   cart: !ruby/object:Cart
-    games: []
-    total_price: 0
+    games:
+    - !ruby/object:Game
+      name: Skyrim
+      price: 30.2
+      genre: Rpg
+      rating: 0
+      online_player_count: 0
+      total_ratings: 0
+      multiplayer_option: false
+    total_price: 30.2
   logged_in: true

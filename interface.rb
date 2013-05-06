@@ -109,8 +109,8 @@ class Interface
 
   def order_games()
     if @user.logged_in
-      if not(@user.cart.games.empty?)
-        @user.order
+      if not(@current_account.cart.games.empty?)
+        @current_account.order
         puts "Games in cart were successfully ordered."
       else
         puts "Cart is empty."
@@ -171,13 +171,14 @@ class Interface
   end 
 
   def log_out
-    if (!@user.logged_in)
-      puts "User is already logged out"
-    else
+
+      @user.log_out
+      @current_account.log_out
       @current_account=nil
-      @user.logged_in=false
       puts "Successfully logged out"
-    end  
+      rescue AlreadyLoggedOut
+        puts "User was already logged out"
+
   end
 
   def get_recommendations
@@ -227,22 +228,25 @@ class Interface
           end 
 
           user= YAML::load_file('user.yml')
-          
-          @user=user
+          if !user.nil?
+            @user=user
+          end
      
 
           accounts=YAML::load_file('accounts.yml')
-          accounts.each do |account|
-            Account.all_accounts<<account
-            if account.logged_in=true
-              @current_account=account
-            end  
-            @accounts<<account
-          
-          end
+          if !accounts.nil?
+            accounts.each do |account|
+              Account.all_accounts<<account
+              if account.logged_in=true
+                @current_account=account
+              end  
+              @accounts<<account
+            
+            end
+          end  
 
           if @user.logged_in
-            puts "State: logged in to #{@current_account.login_name} account"
+            puts "State: logged in to #{@current_account.login_name}'s account"
           else
             puts "State: logged out"
           end
@@ -251,9 +255,9 @@ class Interface
         when "B" then buy_game()
         when "C" then 
           if (!@user.logged_in)
-            list_games(@user.cart.games) {"User's Cart"}
+            list_games(@user.cart.games) {"User's cart"}
           else  
-            list_games(@current_account.cart.games) {"#{@current_account.login_name}'s Cart"}
+            list_games(@current_account.cart.games) {"#{@current_account.login_name}'s cart"}
           end  
         when "L" then list_games(@user.bought_games ) {"Bought games"}
         when "LOGIN" then log_in 
