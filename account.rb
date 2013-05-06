@@ -36,7 +36,7 @@ class Account
   def order()
     order=Order.new(@cart.games)
     @orders<<order
-    @cart.games.clear
+    @cart.clear
   end
 
   def most_bought_genre

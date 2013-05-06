@@ -181,9 +181,70 @@ class Interface
 
   end
 
+
+
   def get_recommendations
-    list_games(@user.get_recommendations(@games)) {"Recommendations"}
+
+    list_games(@current_account.get_recommendations(@games)) {"Recommendations"}
+
+  end
+
+  def load
+    games=YAML::load_file('games.yml')
+    @games.clear
+    games.each do |game|
+      @games<<game
+    end 
+
+    user= YAML::load_file('user.yml')
+    if !user.nil?
+      @user=user
+    end
+
+    accounts=YAML::load_file('accounts.yml')
+    @current_account=nil
+    @accounts.clear
+    if !accounts.nil?
+      accounts.each do |account|
+        Account.all_accounts<<account
+        if account.logged_in==true
+          @current_account=account
+        end  
+        @accounts<<account
+      
+      end
+    end  
+    @accounts.each do|acc|
+      puts "Acc login status#{acc.login_name} #{acc.logged_in}"
+    end  
+
+    if @user.logged_in
+      puts "State: logged in to #{@current_account.login_name}'s account"
+    else
+      puts "State: logged out"
+    end   
   end 
+
+  def store
+
+    File.open( 'games.yml', 'w' ) do|f|
+      f.print @games.to_yaml
+    end  
+
+    File.open( 'user.yml', 'w' ) do|f|
+      f.puts @user.to_yaml
+    end  
+
+    File.open( 'accounts.yml', 'w' ) do|f|
+      f.puts @accounts.to_yaml
+    end  
+  end
+
+  def list_orders
+    @current_account.orders.each_with_index do |order, index|
+      list_games(order.games) {"Order Nr.#{index}"}
+    end  
+  end
 
   def main_loop
     puts "\nWelcome to the online game store!\n\n"
@@ -192,8 +253,9 @@ class Interface
     puts "(A)dd a game to cart"
     puts "(R)emove a game from cart"
     puts "(O)rder all the games in your cart"
-    puts "(L)ist bought games"
+
     puts "List games in (C)art"
+    puts "List (ORDERS)"
     puts "(E)xit"
     puts "(LOGIN)"
     puts "(LOGOUT)"
@@ -206,51 +268,8 @@ class Interface
       print "\nSelect your action:"
       action = gets.chomp.upcase
       case action
-        when "STORE" then 
-
-          File.open( 'games.yml', 'w+' ) do|f|
-            f.print @games.to_yaml
-          end  
-
-          File.open( 'user.yml', 'w+' ) do|f|
-            f.puts @user.to_yaml
-          end  
-
-          File.open( 'accounts.yml', 'w+' ) do|f|
-            f.puts @accounts.to_yaml
-          end
-
-        when "LOAD" then
-          games=YAML::load_file('games.yml')
-          games.each do |game|
-  
-            @games<<game
-          end 
-
-          user= YAML::load_file('user.yml')
-          if !user.nil?
-            @user=user
-          end
-     
-
-          accounts=YAML::load_file('accounts.yml')
-          if !accounts.nil?
-            accounts.each do |account|
-              Account.all_accounts<<account
-              if account.logged_in=true
-                @current_account=account
-              end  
-              @accounts<<account
-            
-            end
-          end  
-
-          if @user.logged_in
-            puts "State: logged in to #{@current_account.login_name}'s account"
-          else
-            puts "State: logged out"
-          end
-
+        when "STORE" then store
+        when "LOAD" then load
         when "A" then add_game_to_cart
         when "B" then buy_game()
         when "C" then 
@@ -259,9 +278,9 @@ class Interface
           else  
             list_games(@current_account.cart.games) {"#{@current_account.login_name}'s cart"}
           end  
-        when "L" then list_games(@user.bought_games ) {"Bought games"}
         when "LOGIN" then log_in 
         when "LOGOUT" then log_out 
+        when "ORDERS" then list_orders  
         when "ACC" then create_account
         when "AV" then list_games(@games) {"Available games"} 
         when "G" then get_recommendations()  

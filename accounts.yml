@@ -3,10 +3,34 @@
   login_name: jonas
   password: '12345678'
   cart: !ruby/object:Cart
+    games: []
+    total_price: 0
+  logged_in: false
+  orders:
+  - !ruby/object:Order
     games:
     - !ruby/object:Game
-      name: Assassins Creed
-      price: 24.99
+      name: Minecraft
+      price: 15.99
+      genre: Sandbox
+      rating: 0
+      online_player_count: 0
+      total_ratings: 0
+      multiplayer_option: false
+    created_on: 2013-05-06 19:21:13.767216000 +03:00
+- !ruby/object:Account
+  login_name: petras
+  password: '12345678'
+  cart: !ruby/object:Cart
+    games: []
+    total_price: 0
+  logged_in: false
+  orders:
+  - !ruby/object:Order
+    games:
+    - !ruby/object:Game
+      name: Gta
+      price: 20.3
       genre: Action
       rating: 0
       online_player_count: 0
@@ -21,35 +45,11 @@
       total_ratings: 0
       multiplayer_option: false
     - !ruby/object:Game
-      name: Fifa
-      price: 23.78
-      genre: Sport
+      name: Crysis
+      price: 20.0
+      genre: Action
       rating: 0
       online_player_count: 0
       total_ratings: 0
       multiplayer_option: false
-    - !ruby/object:Game
-      name: Call of Duty
-      price: 13.99
-      genre: Shooter
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    total_price: 92.74999999999999
-  logged_in: true
-- !ruby/object:Account
-  login_name: petras
-  password: '12345678'
-  cart: !ruby/object:Cart
-    games:
-    - !ruby/object:Game
-      name: Skyrim
-      price: 30.2
-      genre: Rpg
-      rating: 0
-      online_player_count: 0
-      total_ratings: 0
-      multiplayer_option: false
-    total_price: 30.2
-  logged_in: true
+    created_on: 2013-05-06 19:22:45.351432000 +03:00
