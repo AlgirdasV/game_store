@@ -11,6 +11,35 @@ require_relative 'cart'
 require_relative 'game'
 require_relative 'account'
 
+
+RSpec::Matchers.define :match_genre do |expected|
+  match do |actual|
+    actual.each do |game|
+			
+			description { "#{game} should match genre #{expected}" }
+	    failure_message_for_should { "Game #{game.name} does not match #{expected} genre" }
+	    failure_message_for_should_not { "Game #{game.name} matches #{expected} genre"}
+	    break false unless game.genre==expected	
+		end	
+
+  end
+end
+
+RSpec::Matchers.define :match_orders_by_date do |date_from,date_to|
+  match do |actual|
+    actual.each_with_index do |order, index|
+    	start_time = date_from
+    	end_time=date_to
+    	range=date_from..date_to
+			description { "#{order}'s date should match date #{range}" }
+	    failure_message_for_should { "Order Nr. #{index}, created on #{order.created_on} does not match #{range}" }
+	    failure_message_for_should_not {"Order Nr. #{index}, created on #{order.created_on} date matches #{range}" }
+	    break false unless order.created_on.between?(start_time, end_time)
+
+	  end
+  end
+end
+
 #Used matchers:
 #1 be_empty
 #2 include
@@ -94,7 +123,7 @@ describe User do
 
 			it "should return the created account" do
 				Account.all_accounts.clear
-			  @user.create_account("new","pass1234").should == Account.all_accounts.first#SKETCHY
+			  @user.create_account("new","pass1234").should == Account.all_accounts.first
 			end
 
 			it "should only accept a unique login name" do
@@ -172,7 +201,6 @@ describe User do
 					@user.cart.games.should be_empty
 				end
 
-
 			end
 
 			context "if invalid" do
@@ -227,6 +255,8 @@ describe User do
 			end
 		end
 
+
+
 		
 		
 	end
@@ -277,6 +307,29 @@ describe Account do
 
 	it "should have a list of previous orders" do
 		@account.orders.should be_empty
+	end
+
+	it "should be able to view orders by date" do
+		@game1=Game.new("",0,"","")
+		@game2=Game.new("",0,"","")
+		
+		@order1=Order.new([@game1,@game2])
+		@order2=Order.new([@game1,@game2])
+		@order3=Order.new([@game1,@game2])
+		@order4=Order.new([@game1,@game2])
+		@order1.stub(:created_on).and_return(Time.new(2013, 1, 25))
+		@order2.stub(:created_on).and_return(Time.new(2013, 2, 1))
+		@order3.stub(:created_on).and_return(Time.new(2013, 2, 28))
+		@order4.stub(:created_on).and_return(Time.new(2013, 3, 1))
+		@account.orders<<@order1
+		@account.orders<<@order2
+		@account.orders<<@order3
+		@account.orders<<@order4
+		
+  	@date_from= Time.new(2013, 1, 30)
+  	@date_to= Time.new(2013, 2, 28)
+
+	  @account.orders_by_date(@date_from,@date_to).should match_orders_by_date(@date_from,@date_to)
 	end
 
 	it "should have a login name" do
@@ -342,13 +395,13 @@ describe Account do
 	context "ability to get recommendations" do
 			before(:each) do
 					@available_games=[
-			  	  @action_game1=Game.new("",0,"action",""),
-						@action_game2=Game.new("",0,"action",""),
-						@action_game3=Game.new("",0,"action",""),
-						@racing_game1=Game.new("",0,"racing",""),
-						@racing_game2=Game.new("",0,"racing",""),
-						@racing_game3=Game.new("",0,"racing",""),
-						@racing_game4=Game.new("",0,"racing","")
+			  	  @action_game1=Game.new("action1",0,"action",""),
+						@action_game2=Game.new("action2",0,"action",""),
+						@action_game3=Game.new("action3",0,"action",""),
+						@racing_game1=Game.new("racing1",0,"racing",""),
+						@racing_game2=Game.new("racing2",0,"racing",""),
+						@racing_game3=Game.new("racing3",0,"racing",""),
+						@racing_game4=Game.new("racing4",0,"racing","")
 					]
 					@user=User.new()
 					@account=@user.create_account("Name","password")
@@ -369,7 +422,8 @@ describe Account do
 		
 			describe ".get_recommendations(games_available)" do
 				it "should give games according to users most_bought_genre" do
-					@account.get_recommendations(@available_games).should==[@racing_game1,@racing_game2,@racing_game3,@racing_game4]
+					@account.get_recommendations(@available_games).should match_genre(@account.most_bought_genre)
+
 				end
 			end
 
@@ -425,7 +479,7 @@ describe Game do
 		end
 
 		it "should have total_ratings" do
-			@game.total_ratings=[]
+			@game.total_ratings.should ==0
 		end	
 
 		it "should have multiplayer or singleplayer type" do
@@ -506,4 +560,5 @@ describe Order do
 		@order.created_on.should eql(@time_now)
 	end
 
-end	
+end
+

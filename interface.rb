@@ -29,7 +29,7 @@ class Interface
       namelen=20
       genrelen=25
       pricelen=5  
-      puts "#{yield}:"
+      puts "#{yield}:\n\n"
       printf("%-#{numlen}s%-#{namelen}s%-#{genrelen}s%-#{pricelen}s\n","Number:","Name:","Genre:","Price:")
       games.each_with_index do |game,index|
         printf("%-#{numlen}d%-#{namelen}s%-#{genrelen}s%-#{pricelen}s\n",index+1,game.name,game.genre,game.price)
@@ -46,21 +46,6 @@ class Interface
     input
   end
     
-  def buy_game()
-    if @user.logged_in
-      print "Buy game Nr.:"
-      game_number = Integer(get_valid_integer {"Buy game Nr.:"})
-      while not (game_number.between?(1,@games.size))
-        puts "Wrong game number. Try again."  
-        print "Buy game Nr.:"
-        game_number = Integer(get_valid_integer {"Buy game Nr.:"})
-      end
-      @user.buy(@games[game_number-1])
-      puts "Game \"#{@games[game_number-1].name}\" was bought successfully."
-    else
-      puts "You must login before buying games"
-    end  
-  end  
 
   def add_game_to_cart()
     print "Add game to cart Nr.:"
@@ -184,9 +169,11 @@ class Interface
 
 
   def get_recommendations
-
-    list_games(@current_account.get_recommendations(@games)) {"Recommendations"}
-
+    if !@user.logged_in
+      puts "You must login before getting recommendations"
+    else  
+      list_games(@current_account.get_recommendations(@games)) {"Recommendations"}
+    end
   end
 
   def load
@@ -213,9 +200,6 @@ class Interface
         @accounts<<account
       
       end
-    end  
-    @accounts.each do|acc|
-      puts "Acc login status#{acc.login_name} #{acc.logged_in}"
     end  
 
     if @user.logged_in
@@ -246,24 +230,36 @@ class Interface
     end  
   end
 
+  def list_cart
+    if (!@user.logged_in)
+      list_games(@user.cart.games) {"User's cart"}
+      puts "\t\t\t\t\t\t     Total price:#{@user.cart.total_price}"
+    else  
+      list_games(@current_account.cart.games) {"#{@current_account.login_name}'s cart"}
+      puts "\t\t\t\t\t\t     Total price:#{@current_account.cart.total_price}"
+    end 
+  end  
+
+  def unrecognized_action 
+    puts"Unrecognized action. Please try again" 
+  end  
+
   def main_loop
     puts "\nWelcome to the online game store!\n\n"
     puts "Available actions:"
-    puts "(B)uy a game"
     puts "(A)dd a game to cart"
     puts "(R)emove a game from cart"
-    puts "(O)rder all the games in your cart"
-
-    puts "List games in (C)art"
+    puts "(ORDER) all the games in your cart"
+    puts "List games in (CART)"
     puts "List (ORDERS)"
-    puts "(E)xit"
+    puts "(EXIT)"
     puts "(LOGIN)"
     puts "(LOGOUT)"
     puts "Create (ACC)ount"
-    puts "(G)et recommendations"
+    puts "(GET) recommendations"
     puts "List (AV)ailable games"
-    puts "(LOAD)"
-    puts "(STORE)"
+    puts "(LOAD) state"
+    puts "(STORE) state"
     while (true)
       print "\nSelect your action:"
       action = gets.chomp.upcase
@@ -271,23 +267,17 @@ class Interface
         when "STORE" then store
         when "LOAD" then load
         when "A" then add_game_to_cart
-        when "B" then buy_game()
-        when "C" then 
-          if (!@user.logged_in)
-            list_games(@user.cart.games) {"User's cart"}
-          else  
-            list_games(@current_account.cart.games) {"#{@current_account.login_name}'s cart"}
-          end  
+        when "CART" then list_cart 
         when "LOGIN" then log_in 
         when "LOGOUT" then log_out 
         when "ORDERS" then list_orders  
         when "ACC" then create_account
-        when "AV" then list_games(@games) {"Available games"} 
-        when "G" then get_recommendations()  
+        when "AV" then list_games(@games) {"Available games list"} 
+        when "GET" then get_recommendations()  
         when "R" then remove_game_from_cart
-        when "O" then order_games 
-        when "E" then break; 
-        else puts"Unrecognized action. Please try again"  
+        when "ORDER" then order_games 
+        when "EXIT" then break; 
+        else unrecognized_action 
       end
       
     end  
@@ -295,5 +285,5 @@ class Interface
 end
 
 interface = Interface.new()
-interface.list_games(interface.games) {"Available games"}
+interface.list_games(interface.games) {"Available games list"}
 interface.main_loop
