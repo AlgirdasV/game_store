@@ -15,6 +15,10 @@ class Account
     @@all_accounts
   end
 
+  def same_as(another_acc)
+    self.login_name==another_acc.login_name && self.password==another_acc.password && self.logged_in==another_acc.logged_in && self.cart.same_as(another_acc.cart)
+  end  
+
   def log_out
     if @logged_in==false
       raise AlreadyLoggedOut
@@ -38,6 +42,16 @@ class Account
     @orders<<order
     @cart.clear
   end
+
+  def orders_by_date(date_from,date_to)
+    list=[]
+    orders.each do |order|
+      if order.created_on.between?(date_from,date_to)
+        list<<order
+      end  
+    end  
+    return list
+  end  
 
   def most_bought_genre
     genres=[]

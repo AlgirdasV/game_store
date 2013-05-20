@@ -13,13 +13,14 @@ class String
 end
 
 class Interface
-  attr_accessor :games,:user,:accounts,:user,:current_account
+  attr_accessor :games,:user,:accounts,:user,:current_account,:running
 
   def initialize
     @user=User.new()
     @current_account=nil
     @accounts=[]
     @games=[]
+    @running=true
   end  
 
 
@@ -176,19 +177,19 @@ class Interface
     end
   end
 
-  def load
-    games=YAML::load_file('games.yml')
+  def load(games_file,user_file,accounts_file)
+    games=YAML::load_file(games_file)
     @games.clear
     games.each do |game|
       @games<<game
     end 
 
-    user= YAML::load_file('user.yml')
+    user= YAML::load_file(user_file)
     if !user.nil?
       @user=user
     end
 
-    accounts=YAML::load_file('accounts.yml')
+    accounts=YAML::load_file(accounts_file)
     @current_account=nil
     @accounts.clear
     if !accounts.nil?
@@ -209,17 +210,17 @@ class Interface
     end   
   end 
 
-  def store
+  def store(games_file,user_file,accounts_file)
 
-    File.open( 'games.yml', 'w' ) do|f|
+    File.open(games_file, 'w' ) do|f|
       f.print @games.to_yaml
     end  
 
-    File.open( 'user.yml', 'w' ) do|f|
+    File.open(user_file, 'w' ) do|f|
       f.puts @user.to_yaml
     end  
 
-    File.open( 'accounts.yml', 'w' ) do|f|
+    File.open( accounts_file, 'w' ) do|f|
       f.puts @accounts.to_yaml
     end  
   end
@@ -227,6 +228,7 @@ class Interface
   def list_orders
     @current_account.orders.each_with_index do |order, index|
       list_games(order.games) {"Order Nr.#{index}"}
+      
     end  
   end
 
@@ -247,43 +249,46 @@ class Interface
   def main_loop
     puts "\nWelcome to the online game store!\n\n"
     puts "Available actions:"
+    puts "(LOGIN)"
+    puts "(LOGOUT)"
+    puts "Create (ACC)ount"
+    puts "List available (GAMES)"
     puts "(A)dd a game to cart"
     puts "(R)emove a game from cart"
     puts "(ORDER) all the games in your cart"
     puts "List games in (CART)"
-    puts "List (ORDERS)"
-    puts "(EXIT)"
-    puts "(LOGIN)"
-    puts "(LOGOUT)"
-    puts "Create (ACC)ount"
+    puts "List (ORDERS)"   
     puts "(GET) recommendations"
-    puts "List (AV)ailable games"
     puts "(LOAD) state"
     puts "(STORE) state"
-    while (true)
-      print "\nSelect your action:"
-      action = gets.chomp.upcase
-      case action
-        when "STORE" then store
-        when "LOAD" then load
-        when "A" then add_game_to_cart
-        when "CART" then list_cart 
-        when "LOGIN" then log_in 
-        when "LOGOUT" then log_out 
-        when "ORDERS" then list_orders  
-        when "ACC" then create_account
-        when "AV" then list_games(@games) {"Available games list"} 
-        when "GET" then get_recommendations()  
-        when "R" then remove_game_from_cart
-        when "ORDER" then order_games 
-        when "EXIT" then break; 
-        else unrecognized_action 
-      end
-      
+    puts "(EXIT)"  
+    print "\nSelect your action:"
+    while (action = gets.chomp.upcase rescue nil)
+     
+        case action
+          when "STORE" then store('games.yml','user.yml','accounts.yml')
+          when "LOAD" then load('games.yml','user.yml','accounts.yml')
+          when "A" then add_game_to_cart
+          when "CART" then list_cart 
+          when "LOGIN" then log_in 
+          when "LOGOUT" then log_out 
+          when "ORDERS" then list_orders  
+          when "ACC" then create_account
+          when "AV" then list_games(@games) {"Available games list"} 
+          when "GET" then get_recommendations()  
+          when "R" then remove_game_from_cart
+          when "ORDER" then order_games 
+          when "EXIT" then break;   
+          else unrecognized_action 
+        end  
+      print "\nSelect your action:"  
     end  
   end  
+
 end
 
 interface = Interface.new()
+interface.load('games.yml','user.yml','accounts.yml')
 interface.list_games(interface.games) {"Available games list"}
 interface.main_loop
+interface.store('games.yml','user.yml','accounts.yml')

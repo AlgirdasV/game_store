@@ -1,0 +1,6 @@
+--- !ruby/object:User
+bought_games: []
+cart: !ruby/object:Cart
+  games: []
+  total_price: 0
+logged_in: true

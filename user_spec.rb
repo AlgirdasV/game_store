@@ -12,6 +12,7 @@ require_relative 'game'
 require_relative 'account'
 
 
+
 RSpec::Matchers.define :match_genre do |expected|
   match do |actual|
     actual.each do |game|
@@ -25,16 +26,14 @@ RSpec::Matchers.define :match_genre do |expected|
   end
 end
 
-RSpec::Matchers.define :match_orders_by_date do |date_from,date_to|
+RSpec::Matchers.define :filter_orders_by_date do |date_from,date_to|
   match do |actual|
     actual.each_with_index do |order, index|
-    	start_time = date_from
-    	end_time=date_to
     	range=date_from..date_to
 			description { "#{order}'s date should match date #{range}" }
 	    failure_message_for_should { "Order Nr. #{index}, created on #{order.created_on} does not match #{range}" }
-	    failure_message_for_should_not {"Order Nr. #{index}, created on #{order.created_on} date matches #{range}" }
-	    break false unless order.created_on.between?(start_time, end_time)
+	    failure_message_for_should_not {"Order Nr. #{index}, created on #{order.created_on} matches #{range}" }
+	    break false unless order.created_on.between?(date_from, date_to)
 
 	  end
   end
@@ -47,6 +46,8 @@ end
 #4 change
 #5 match_array
 
+
+	
 describe User do
 
 	context "when using first time" do
@@ -329,7 +330,7 @@ describe Account do
   	@date_from= Time.new(2013, 1, 30)
   	@date_to= Time.new(2013, 2, 28)
 
-	  @account.orders_by_date(@date_from,@date_to).should match_orders_by_date(@date_from,@date_to)
+	  @account.orders_by_date(@date_from,@date_to).should filter_orders_by_date(@date_from,@date_to)
 	end
 
 	it "should have a login name" do
@@ -561,4 +562,6 @@ describe Order do
 	end
 
 end
+
+
 

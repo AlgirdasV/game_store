@@ -48,6 +48,12 @@ class User
     @logged_in=false
   end  
 
+  def same_as(another_user)
+    self.cart.same_as(another_user.cart) && self.logged_in==another_user.logged_in
+      
+ 
+  end  
+
   def create_account(login_name,password)
     begin
       if @@login_names.include?(login_name)

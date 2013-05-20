@@ -30,6 +30,10 @@ class Cart
     end  
   end  
 
+  def same_as(another_cart)
+    self.games==another_cart.games && self.total_price==another_cart.total_price
+  end  
+
   def clear
     @games.clear
     @total_price=0
